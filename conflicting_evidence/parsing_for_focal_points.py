@@ -12,12 +12,21 @@ f = open("nat_claims_dev.jsonl")
 _items = list(f)
 
 
-def find_subtrees(sentence): 
-    sentence = "Jane and her big beautiful purse went for a walk."
+def find_subtrees(sentence):
+    sentence = "I think that it is not an elephant."
     subtrees = []
     tokens = nlp(sentence)
     for token in tokens:
-        if token.pos_ in ["VERB", "ADJ", "ADP", "PRON", "NOUN", "CCONJ", "SCONJ"]:
+        if token.pos_ in [
+            "VERB",
+            "ADJ",
+            "ADP",
+            "PRON",
+            "NOUN",
+            "CCONJ",
+            "SCONJ",
+            "VERB",
+        ]:
             if token.dep_ in [
                 "attr",
                 "acomp",
@@ -25,23 +34,56 @@ def find_subtrees(sentence):
                 "prep",
                 "agent",
                 "compound",
-            ] and (
-                token.head.lemma_ not in ["be", "same"]
-            ):
-                subtrees.append([t.text for t in token.subtree])
+            ] and (token.head.lemma_ not in ["be", "same"]):
+                subtrees.append([t for t in token.subtree])
             if (
                 token.pos_ == "PRON"
                 and token.dep_ in ["nsubj", "dobj"]
                 and token.head.dep_ in ["relcl", "advcl"]
             ):
-                subtrees.append([t.text for t in token.head.subtree])
-            #if token.pos_ in ["CCONJ"]:
+                subtrees.append([t for t in token.head.subtree])
+            if token.lemma_ in [
+                "think",
+                "believe",
+                "tell",
+                "suspect",
+                "guess",
+                "hear",
+                "hope",
+                "assume",
+                "bet",
+                "fear",
+                "expect",
+                "pretend",
+                "imagine",
+                "seem",
+                "say",
+                "signal",
+                "demand",
+                "feel",
+                "insist",
+            ]:  # the list based on commitmentbank
+                main_verb = [
+                    child for child in token.children if child.pos_ in ["VERB", "AUX"]
+                ]
+                if main_verb:
+                    embedded_clause = [t for t in main_verb[0].subtree]
+                    full_clause = [t for t in token.subtree]
+                    hedge_clause = [
+                        token
+                        for token in tokens
+                        if token in full_clause and token not in embedded_clause
+                    ]
+
+                    subtrees.append(hedge_clause)
+            # if token.pos_ in ["CCONJ"]:
             #    next_token = token.i + 1
             #    subtrees.append(
-            #        [t.text for t in token.subtree]
-            #        + [t.text for t in [token for token in tokens][next_token].subtree]
+            #        [t for t in token.subtree]
+            #        + [t for t in [token for token in tokens][next_token].subtree]
             #    )
     return subtrees
+
 
 for item in _items:
     result = json.loads(item)
@@ -55,4 +97,3 @@ for item in _items:
     for sentence_annotation in sentence_annotations:
         sentence = [s for s in sentence_annotation.keys()][0]
         sentence_subtrees = find_subtrees(sentence)
-        
