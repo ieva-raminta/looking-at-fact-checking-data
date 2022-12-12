@@ -13,10 +13,11 @@ _items = list(f)
 
 
 def find_subtrees(sentence): 
+    sentence = "Jane and her big beautiful purse went for a walk."
     subtrees = []
     tokens = nlp(sentence)
     for token in tokens:
-        if token.pos_ in ["VERB", "ADJ", "ADP", "PRON", "NOUN", "CCONJ"]:
+        if token.pos_ in ["VERB", "ADJ", "ADP", "PRON", "NOUN", "CCONJ", "SCONJ"]:
             if token.dep_ in [
                 "attr",
                 "acomp",
@@ -26,20 +27,20 @@ def find_subtrees(sentence):
                 "compound",
             ] and (
                 token.head.lemma_ not in ["be", "same"]
-            ):  # and token.head.lemma_ == 'be':
+            ):
                 subtrees.append([t.text for t in token.subtree])
             if (
                 token.pos_ == "PRON"
                 and token.dep_ in ["nsubj", "dobj"]
-                and token.head.dep_ in ["relcl"]
+                and token.head.dep_ in ["relcl", "advcl"]
             ):
                 subtrees.append([t.text for t in token.head.subtree])
-            if token.pos_ == "CCONJ":
-                next_token = token.i + 1
-                subtrees.append(
-                    [t.text for t in token.subtree]
-                    + [t.text for t in [token for token in tokens][next_token].subtree]
-                )
+            #if token.pos_ in ["CCONJ"]:
+            #    next_token = token.i + 1
+            #    subtrees.append(
+            #        [t.text for t in token.subtree]
+            #        + [t.text for t in [token for token in tokens][next_token].subtree]
+            #    )
     return subtrees
 
 for item in _items:
