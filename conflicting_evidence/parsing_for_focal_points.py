@@ -13,7 +13,6 @@ _items = list(f)
 
 
 def find_subtrees(sentence):
-    sentence = "I think that it is not an elephant."
     subtrees = []
     tokens = nlp(sentence)
     for token in tokens:
@@ -26,6 +25,7 @@ def find_subtrees(sentence):
             "CCONJ",
             "SCONJ",
             "VERB",
+            "AUX",
         ]:
             if token.dep_ in [
                 "attr",
@@ -36,12 +36,8 @@ def find_subtrees(sentence):
                 "compound",
             ] and (token.head.lemma_ not in ["be", "same"]):
                 subtrees.append([t for t in token.subtree])
-            if (
-                token.pos_ == "PRON"
-                and token.dep_ in ["nsubj", "dobj"]
-                and token.head.dep_ in ["relcl", "advcl"]
-            ):
-                subtrees.append([t for t in token.head.subtree])
+            if token.dep_ in ["relcl", "advcl"]:
+                subtrees.append([t for t in token.subtree])
             if token.lemma_ in [
                 "think",
                 "believe",
@@ -76,12 +72,13 @@ def find_subtrees(sentence):
                     ]
 
                     subtrees.append(hedge_clause)
-            # if token.pos_ in ["CCONJ"]:
-            #    next_token = token.i + 1
-            #    subtrees.append(
-            #        [t for t in token.subtree]
-            #        + [t for t in [token for token in tokens][next_token].subtree]
-            #    )
+            if token.pos_ in ["CCONJ"]:
+                conjuncts = [t for t in tokens if t.dep_ == "conj"]
+                for conjunct in conjuncts:
+                    if token.head == conjunct.head:
+                        subtrees.append(
+                            [t for t in token.subtree] + [t for t in conjunct.subtree]
+                        )
     return subtrees
 
 
