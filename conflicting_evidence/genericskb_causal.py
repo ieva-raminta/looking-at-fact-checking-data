@@ -3,6 +3,8 @@ import json
 f = open("cskb-waterloo-06-21-with-bert-scores.jsonl")
 _items = list(f)
 
+causal_counter = 0
+
 for item in _items:
     result = json.loads(item)
     following_sentence = result["context"]["sentences_after"][0].lower()
@@ -16,3 +18,7 @@ for item in _items:
         or following_sentence.startswith("on account of this")
         or following_sentence.startswith("consequently")
     )
+    if following_sentence_starts_with_causal_connective:
+        causal_counter += 1
+
+print(len(_items), causal_counter)
