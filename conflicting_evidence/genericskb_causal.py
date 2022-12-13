@@ -13,4 +13,6 @@ for item in _items:
         or following_sentence.startswith("because of this")
         or following_sentence.startswith("because of it")
         or following_sentence.startswith("for this reason")
+        or following_sentence.startswith("on account of this")
+        or following_sentence.startswith("consequently")
     )
