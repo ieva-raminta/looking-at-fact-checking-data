@@ -1,23 +1,29 @@
 import json
+import pdb
 
 f = open("cskb-waterloo-06-21-with-bert-scores.jsonl")
 _items = list(f)
 
 causal_counter = 0
+total_counter = 0
 
 for item in _items:
     result = json.loads(item)
-    following_sentence = result["context"]["sentences_after"][0].lower()
-    following_sentence_starts_with_causal_connective = (
-        following_sentence.startswith("therefore")
-        or following_sentence.startswith("as a result")
-        or following_sentence.startswith("this is why")
-        or following_sentence.startswith("because of this")
-        or following_sentence.startswith("because of it")
-        or following_sentence.startswith("for this reason")
-        or following_sentence.startswith("on account of this")
-        or following_sentence.startswith("consequently")
-    )
-    if following_sentence_starts_with_causal_connective:
-        causal_counter += 1
-        print(causal_counter)
+    total_counter += 1
+    if result["knowledge"]["context"]["sentences_after"]:
+        following_sentence = result["knowledge"]["context"]["sentences_after"][0].lower()
+        following_sentence_starts_with_causal_connective = (
+            following_sentence.startswith("therefore")
+            or following_sentence.startswith("as a result")
+            or following_sentence.startswith("this is why")
+            or following_sentence.startswith("because of this")
+            or following_sentence.startswith("because of it")
+            or following_sentence.startswith("for this reason")
+            or following_sentence.startswith("on account of this")
+            or following_sentence.startswith("consequently")
+        )
+        if following_sentence_starts_with_causal_connective:
+            causal_counter += 1
+    print(total_counter)
+    print(causal_counter)
+    print("========================================================")
