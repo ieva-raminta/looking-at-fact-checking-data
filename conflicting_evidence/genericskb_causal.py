@@ -1,6 +1,6 @@
 import json
 
-f = open("GenericsKB-Waterloo-With-Context.jsonl")
+f = open("cskb-waterloo-06-21-with-bert-scores.jsonl")
 _items = list(f)
 
 for item in _items:
