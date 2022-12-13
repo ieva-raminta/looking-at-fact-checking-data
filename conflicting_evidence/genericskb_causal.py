@@ -22,8 +22,10 @@ for item in _items:
             or following_sentence.startswith("on account of this")
             or following_sentence.startswith("consequently")
         )
-        if following_sentence_starts_with_causal_connective:
+        if following_sentence_starts_with_causal_connective and causal_counter < 100:
             causal_counter += 1
-    print(total_counter)
-    print(causal_counter)
-    print("========================================================")
+            print(total_counter)
+            print(causal_counter)
+            print(result["knowledge"]["sentence"])
+            print(following_sentence)
+            print("========================================================")
