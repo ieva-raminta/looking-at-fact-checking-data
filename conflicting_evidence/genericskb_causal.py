@@ -20,5 +20,4 @@ for item in _items:
     )
     if following_sentence_starts_with_causal_connective:
         causal_counter += 1
-
-print(len(_items), causal_counter)
+        print(causal_counter)
