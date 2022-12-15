@@ -11,6 +11,7 @@ _items = list(f)
 
 conflicting_evidence_items = []
 conflicting_evidence_within_one_sentence_items = []
+sentence_annotations_counter = 0
 
 for item in _items:
     result = json.loads(item)
@@ -25,8 +26,9 @@ for item in _items:
     supporting_sentences_label_distribution = []
     refuting_sentences_label_distribution = []
     for sentence_annotation in sentence_annotations:
-        if len(set(list(sentence_annotations[0].values())[0])) > 1:
+        if len(set(list(sentence_annotation.values())[0])) > 1:
             conflicting_evidence_within_one_sentence_items.append(result)
+        sentence_annotations_counter += 1
         list_of_labels = [s for s in sentence_annotation.values()][0]
         if list_of_labels:
             most_common_label_counter = Counter(list_of_labels)
@@ -49,3 +51,8 @@ for item in _items:
 print(len(conflicting_evidence_items))
 print(len(_items))
 print(len(conflicting_evidence_items) / len(_items))
+print(
+    len(conflicting_evidence_within_one_sentence_items),
+    sentence_annotations_counter,
+    len(conflicting_evidence_within_one_sentence_items) / sentence_annotations_counter,
+)
