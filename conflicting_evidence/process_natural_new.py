@@ -26,10 +26,10 @@ for item in _items:
     supporting_sentences_label_distribution = []
     refuting_sentences_label_distribution = []
     for sentence_annotation in sentence_annotations:
-        if len(set(list(sentence_annotation.values())[0])) > 1:
+        list_of_labels = [s for s in sentence_annotation.values()][0]
+        if len(set(list_of_labels)) > 1:
             conflicting_evidence_within_one_sentence_items.append(result)
         sentence_annotations_counter += 1
-        list_of_labels = [s for s in sentence_annotation.values()][0]
         if list_of_labels:
             most_common_label_counter = Counter(list_of_labels)
 
