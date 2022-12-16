@@ -13,6 +13,7 @@ _items = list(f)
 
 
 def find_subtrees(sentence):
+    sentence = 'During the 2008 Summer Olympics the age of four Chinese gymnasts — He Kexin, Jiang Yuyuan, Deng Linlin, and Yang Yilin — was brought into question, with many foreign media outlets speculating that they were underage during the Olympics.'
     subtrees = []
     tokens = nlp(sentence)
     for token in tokens:
@@ -34,9 +35,9 @@ def find_subtrees(sentence):
                 "prep",
                 "agent",
                 "compound",
-            ] and (token.head.lemma_ not in ["be", "same"]):
+            ]:
                 subtrees.append([t for t in token.subtree])
-            if token.dep_ in ["relcl", "advcl"]:
+            if token.dep_ in ["relcl", "advcl", "ccomp"]:
                 subtrees.append([t for t in token.subtree])
             if token.lemma_ in [
                 "think",
@@ -58,12 +59,13 @@ def find_subtrees(sentence):
                 "demand",
                 "feel",
                 "insist",
+                "speculate",
             ]:  # the list based on commitmentbank
-                main_verb = [
+                embedded_verb = [
                     child for child in token.children if child.pos_ in ["VERB", "AUX"]
                 ]
-                if main_verb:
-                    embedded_clause = [t for t in main_verb[0].subtree]
+                if embedded_verb:
+                    embedded_clause = [t for t in embedded_verb[0].subtree]
                     full_clause = [t for t in token.subtree]
                     hedge_clause = [
                         token
