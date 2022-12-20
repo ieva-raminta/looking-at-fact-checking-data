@@ -101,18 +101,16 @@ def tokenize_function(examples):
     return tokenizer(examples["premise"], examples["hypothesis"], padding="max_length")
 
 
-tokenized_mnli = loaded_mnli.map(tokenize_function, batched=True)
+tokenized_nli = nli_dataset.map(tokenize_function, batched=True)
 
-small_train_dataset = tokenized_mnli["train"].shuffle(seed=42).select(range(1000))
-small_eval_dataset = (
-    tokenized_mnli["validation_matched"].shuffle(seed=42).select(range(1000))
-)
+train_dataset = tokenized_nli["train"].shuffle(seed=42)
+eval_dataset = tokenized_nli["validation_matched"].shuffle(seed=42)
 
 trainer = Trainer(
     model=model,
     args=training_args,
-    train_dataset=small_train_dataset,
-    eval_dataset=small_eval_dataset,
+    train_dataset=train_dataset,
+    eval_dataset=eval_dataset,
     compute_metrics=compute_metrics,
 )
 
