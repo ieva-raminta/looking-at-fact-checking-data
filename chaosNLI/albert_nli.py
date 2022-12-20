@@ -17,7 +17,7 @@ from datasets import load_dataset, concatenate_datasets, ClassLabel, Value
 
 metric = evaluate.load("accuracy")
 training_args = TrainingArguments(
-    output_dir="test_trainer", evaluation_strategy="epoch"
+    output_dir="test_trainer", evaluation_strategy="epoch", num_train_epochs=30,
 )
 
 LABEL_MAP = {"entailment": 0, "neutral": 1, "contradiction": 2, "hidden": 0}
