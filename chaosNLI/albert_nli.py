@@ -58,7 +58,6 @@ def include_wiki_evidence(example):
     )
     page_lines = loaded_wiki_pages["wikipedia_pages"]["lines"][page_index].splitlines()
     example["premise"] = page_lines[example["evidence_sentence_id"]]
-    pdb.set_trace()
     return example
 
 
