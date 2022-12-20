@@ -13,7 +13,7 @@ import pandas as pd
 import os
 import numpy as np
 import evaluate
-from datasets import load_dataset
+from datasets import load_dataset, concatenate_datasets
 
 metric = evaluate.load("accuracy")
 training_args = TrainingArguments(
@@ -104,7 +104,6 @@ def load_fever_data(path):
                 sentence_id = sentence_ids[i]
                 page_row = wiki.loc[wiki["id"] == page_id]
                 if not page_row.empty:
-
                     page_lines = page_row["lines"]
                     page_line = page_lines[list(page_lines.keys())[0]].split("\t")[
                         sentence_id
@@ -137,6 +136,8 @@ else:
 
 # loaded_mnli = load_nli_data("multinli_1.0/multinli_1.0_dev_matched.jsonl")
 loaded_mnli = load_dataset("multi_nli")
+loaded_fever = load_dataset("fever", "v1.0")
+loaded_wiki_pages = load_dataset("fever", "wiki_pages")
 # loaded_qasc = load_qasc_data("qasc/dev.jsonl")
 # loaded_fever = load_fever_data("fever_train.jsonl")
 
@@ -145,8 +146,28 @@ loaded_mnli = load_dataset("multi_nli")
 # df_fever = pd.DataFrame(loaded_fever)
 
 pdb.set_trace()
-# mnli_for_train = [{"label": item["label"], "text": item["sentence1"], "text_pair":item["sentence2"]} for item in loaded_mnli]
 
+loaded_fever.rename_column("claim","hypothesis")
+
+def include_wiki_evidence(example):
+    pdb.set_trace()
+    page_index = loaded_wiki_pages["wikipedia_pages"]["id"].index(example["evidence_wiki_url"])
+    page_lines = loaded_wiki_pages["wikipedia_pages"]["lines"][page_index].split("\t")[1:]
+    example["premise"] = page_lines[example["evidence_sentence_id"]]
+    return example
+
+def map_labels(example): 
+    the_map = {"NOT ENOUGH INFO": 1, "SUPPORTS": 0, "REFUTES": 2}
+    example["label"] = the_map[example["label"]]
+    return example
+
+loaded_fever = loaded_fever.map(map_labels)
+loaded_fever_with_wiki = loaded_fever.map(include_wiki_evidence)
+loaded_fever_with_wiki = loaded_fever_with_wiki.remove_columns(['id', 'evidence_annotation_id', 'evidence_id', 'evidence_wiki_url', 'evidence_sentence_id'])
+loaded_mnli = loaded_mnli.remove_columns(['promptID', 'pairID', 'premise_binary_parse', 'premise_parse', 'hypothesis_binary_parse', 'hypothesis_parse', 'genre'])
+
+assert loaded_mnli.features.type == loaded_fever_with_wiki.features.type
+nli_dataset = concatenate_datasets([loaded_mnli, loaded_fever_with_wiki])
 
 def tokenize_function(examples):
     return tokenizer(examples["premise"], examples["hypothesis"], padding="max_length")
@@ -154,7 +175,7 @@ def tokenize_function(examples):
 
 tokenized_mnli = loaded_mnli.map(
     tokenize_function, batched=True
-)  # [tokenizer(item["text"], item["text_pair"], padding="max_length") for item in mnli_for_train]
+)
 
 pdb.set_trace()
 
