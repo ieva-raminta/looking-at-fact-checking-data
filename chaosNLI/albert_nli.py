@@ -17,7 +17,9 @@ from datasets import load_dataset, concatenate_datasets, ClassLabel, Value
 
 metric = evaluate.load("accuracy")
 training_args = TrainingArguments(
-    output_dir="test_trainer", evaluation_strategy="epoch", num_train_epochs=30,
+    output_dir="test_trainer",
+    evaluation_strategy="epoch",
+    num_train_epochs=30,
 )
 
 LABEL_MAP = {"entailment": 0, "neutral": 1, "contradiction": 2, "hidden": 0}
@@ -49,6 +51,8 @@ loaded_mnli = load_dataset("multi_nli")
 loaded_fever = load_dataset("fever", "v1.0")
 loaded_wiki_pages = load_dataset("fever", "wiki_pages")
 
+loaded_fever.save_to_disk("fever_with_wiki")
+
 loaded_fever.rename_column("claim", "hypothesis")
 
 
@@ -57,7 +61,13 @@ def include_wiki_evidence(example):
         example["evidence_wiki_url"]
     )
     page_lines = loaded_wiki_pages["wikipedia_pages"]["lines"][page_index].splitlines()
-    example["premise"] = page_lines[example["evidence_sentence_id"]]
+    if len(page_lines) == 0:
+        example["premise"] = ""
+    elif example["evidence_sentence_id"] < len(page_lines):
+        example["premise"] = page_lines[example["evidence_sentence_id"]]
+    else:
+        example["premise"] = page_lines[-1]
+
     return example
 
 
