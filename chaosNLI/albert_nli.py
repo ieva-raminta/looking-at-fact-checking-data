@@ -173,4 +173,6 @@ trainer = Trainer(
 
 trainer.train()
 
+trainer.save_model("test_trainer")
+
 pdb.set_trace()
