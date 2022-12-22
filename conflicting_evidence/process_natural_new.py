@@ -47,6 +47,9 @@ for item in _items:
         if len(set(list_of_labels)) > 1:
             conflicting_evidence_within_one_sentence_items.append(sentence_annotation)
             disagreement_within_sentences = True
+            if not (1 in list_of_labels and -1 in list_of_labels): 
+                evidence = [i for i in sentence_annotation.keys()][0]
+                print(evidence)
         sentence_annotations_counter += 1
         if list_of_labels:
             most_common_label_counter = Counter(list_of_labels)
