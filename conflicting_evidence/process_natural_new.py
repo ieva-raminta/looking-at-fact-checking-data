@@ -31,6 +31,7 @@ for item in _items:
             for key in result["block_annotations"].keys()
         ]
     )
+    
     # I don't understand why there are multiple keys here
     # if len(result["block_annotations"].keys()) > 1:
     #    print("many block annotations")
@@ -44,6 +45,8 @@ for item in _items:
     refuting_sentences_label_distribution = []
     for sentence_annotation in sentence_annotations:
         list_of_labels = [s for s in sentence_annotation.values()][0]
+        if "SUPPORTED" in block_annotations and "REFUTED" in block_annotations: 
+            print(block_annotations)
         if len(set(list_of_labels)) > 1:
             conflicting_evidence_within_one_sentence_items.append(sentence_annotation)
             disagreement_within_sentences = True

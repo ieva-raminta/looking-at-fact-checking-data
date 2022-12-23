@@ -51,8 +51,6 @@ loaded_mnli = load_dataset("multi_nli")
 loaded_fever = load_dataset("fever", "v1.0")
 loaded_wiki_pages = load_dataset("fever", "wiki_pages")
 
-loaded_fever.save_to_disk("fever_with_wiki")
-
 loaded_fever.rename_column("claim", "hypothesis")
 
 
@@ -88,6 +86,9 @@ def map_labels(example):
 
 loaded_fever = loaded_fever.map(map_labels)
 loaded_fever_with_wiki = loaded_fever.map(include_wiki_evidence)
+
+loaded_fever_with_wiki.save_to_disk("fever_with_wiki")
+
 loaded_fever_with_wiki = loaded_fever_with_wiki.remove_columns(
     [
         "id",
