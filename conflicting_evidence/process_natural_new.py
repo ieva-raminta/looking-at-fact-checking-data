@@ -1,7 +1,7 @@
 import json
 from collections import Counter
 import random
-
+import numpy as np
 
 def flatten(l):
     return [item for sublist in l for item in sublist]
@@ -19,6 +19,8 @@ difficulty_level_1 = []
 difficulty_level_2 = []
 difficulty_level_3 = []
 
+all_claim_features = []
+all_evidence_features = []
 
 for item in _items[1000:]:
     disagreement_within_sentences = False
@@ -45,16 +47,18 @@ for item in _items[1000:]:
     supporting_sentences_label_distribution = []
     refuting_sentences_label_distribution = []
     random.shuffle(sentence_annotations)
+    claim_contains_negation = True if "not" in claim or "never" in claim or "no" in claim else False
     for sentence_annotation in sentence_annotations:
         list_of_labels = [s for s in sentence_annotation.values()][0]
-        if "SUPPORTED" in block_annotations and "REFUTED" in block_annotations:
-            print(block_annotations)
+        evidence = [i for i in sentence_annotation.keys()][0]
+        list_of_labels_has_a_high_ratio_between_refuted_and_supported = True if (1 in list_of_labels and -1 in list_of_labels) and list_of_labels.count(1)/list_of_labels.count(-1) < 0.3 or (1 in list_of_labels and -1 in list_of_labels) and list_of_labels.count(1)/list_of_labels.count(-1) > 10/3 else False
+        #if "SUPPORTED" in block_annotations and "REFUTED" in block_annotations:
+        #    print(block_annotations)
         if len(set(list_of_labels)) > 1:
             conflicting_evidence_within_one_sentence_items.append(sentence_annotation)
             disagreement_within_sentences = True
-            if 1 in list_of_labels and -1 in list_of_labels:
-                evidence = [i for i in sentence_annotation.keys()][0]
-                print(evidence)
+            #if 1 in list_of_labels and -1 in list_of_labels:
+            #    print(evidence)
         sentence_annotations_counter += 1
         if list_of_labels:
             most_common_label_counter = Counter(list_of_labels)
@@ -69,7 +73,9 @@ for item in _items[1000:]:
             elif most_common_label == -1:
                 refuting_sentences.append(sentence)
                 refuting_sentences_label_distribution.append(list_of_labels)
-
+        all_claim_features.append(claim_contains_negation)
+        all_evidence_features.append(list_of_labels_has_a_high_ratio_between_refuted_and_supported)
+    
     if 1 in most_common_sentence_labels and -1 in most_common_sentence_labels:
         conflicting_evidence_items.append(result)
         disagreement_between_sentences = True
@@ -86,6 +92,8 @@ for item in _items[1000:]:
     elif disagreement_within_sentences and disagreement_between_sentences:
         difficulty_level = 3
         difficulty_level_3.append(result)
+
+correlation = np.corrcoef(np.array(all_claim_features), np.array(all_evidence_features))
 
 
 print(
