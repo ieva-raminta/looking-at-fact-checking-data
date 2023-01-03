@@ -3,17 +3,21 @@ from collections import Counter
 import random
 import numpy as np
 from scipy.stats import entropy
+from sklearn.metrics import cohen_kappa_score as kappa
 
 
 def flatten(l):
     return [item for sublist in l for item in sublist]
 
+
 def most_frequent(List):
-    return max(set(List), key = List.count)
+    return max(set(List), key=List.count)
+
 
 def intersection(lst1, lst2):
     lst3 = [value for value in lst1 if value in lst2]
     return lst3
+
 
 f = open("nat_claims_train.jsonl")
 _items = list(f)
@@ -31,18 +35,70 @@ all_claim_features = []
 all_evidence_features = []
 all_label_features = []
 
-for item in _items[1000:]:
+random.shuffle(_items)
+
+intra_annotator_agreement = 0
+intra_annotator_disagreement = 0
+intra_annotator_agreement_with_negation = 0
+intra_annotator_disagreement_with_negation = 0
+
+for item in _items:
     disagreement_within_sentences = False
     disagreement_between_sentences = False
     result = json.loads(item)
     claim = result["claim"]
+    
+    claim_words = claim.split()
+    negation_words = ["never", "no", "not", "cannot"]
+    claim_contains_negation = (
+        True if intersection(claim_words, negation_words) else False
+    )
+    
     sentence_annotations = [{r[-1]: r[0]} for r in result["annotations"].values()]
+
+    item_annotations = flatten([annot[0] for annot in result["annotations"].values()])
+    item_annotators = flatten([annot[1] for annot in result["annotations"].values()])
+
+    item_annot_dict = {}
+    for labid, lab in enumerate(item_annotators):
+        item_annot_dict[lab] = item_annotations[labid]
+
     block_annotations = flatten(
         [
             [b["label"] for b in result["block_annotations"][key]]
             for key in result["block_annotations"].keys()
         ]
     )
+    block_annotators = flatten(
+        [
+            [b["worker"] for b in result["block_annotations"][key]]
+            for key in result["block_annotations"].keys()
+        ]
+    )
+    block_annot_dict = {}
+    for labid, lab in enumerate(block_annotators):
+        block_annot_dict[lab] = block_annotations[labid]
+
+    for key in item_annot_dict:
+        if key in block_annot_dict:
+            if (
+                (
+                    item_annot_dict[key] == 1
+                    and block_annot_dict[key] in ["RELEVANT", "SUPPORTED"]
+                )
+                or (
+                    item_annot_dict[key] == -1
+                    and block_annot_dict[key] in ["RELEVANT", "REFUTED"]
+                )
+                or (item_annot_dict[key] == 0 and block_annot_dict[key] == "NEUTRAL")
+            ):
+                intra_annotator_agreement += 1
+                if claim_contains_negation: 
+                    intra_annotator_agreement_with_negation += 1
+            else:
+                intra_annotator_disagreement += 1
+                if claim_contains_negation: 
+                    intra_annotator_disagreement_with_negation += 1
 
     # I don't understand why there are multiple keys here
     # if len(result["block_annotations"].keys()) > 1:
@@ -55,10 +111,7 @@ for item in _items[1000:]:
     supporting_sentences = []
     supporting_sentences_label_distribution = []
     refuting_sentences_label_distribution = []
-    random.shuffle(sentence_annotations)
-    claim_words = claim.split()
-    negation_words = ["never", "no", "not", "cannot"]
-    claim_contains_negation = True if intersection(claim_words, negation_words) else False
+
 
     for sentence_annotation in sentence_annotations:
         list_of_labels = [s for s in sentence_annotation.values()][0]
@@ -82,15 +135,20 @@ for item in _items[1000:]:
 
             list_of_labels_has_a_high_ratio_between_refuted_and_supported = (
                 True
-                if (two_labels_exist
-                and list_of_labels.count(1) / list_of_labels.count(-1) < 2/10)
-                or (two_labels_exist
-                and list_of_labels.count(1) / list_of_labels.count(-1) > 10/2)
+                if (
+                    two_labels_exist
+                    and list_of_labels.count(1) / list_of_labels.count(-1) < 2 / 10
+                )
+                or (
+                    two_labels_exist
+                    and list_of_labels.count(1) / list_of_labels.count(-1) > 10 / 2
+                )
                 and most_frequent(list_of_labels) != 0
                 else False
             )
-            label_entropy = entropy(list_of_labels) if len(set(list_of_labels)) > 1 else 0
-
+            label_entropy = (
+                entropy(list_of_labels) if len(set(list_of_labels)) > 1 else 0
+            )
 
             most_common_sentence_labels.append(most_common_label)
             sentence = [s for s in sentence_annotation.keys()][0]
@@ -104,8 +162,8 @@ for item in _items[1000:]:
 
         all_claim_features.append(claim_contains_negation)
         all_evidence_features.append(
-                list_of_labels_has_a_high_ratio_between_refuted_and_supported
-            )
+            list_of_labels_has_a_high_ratio_between_refuted_and_supported
+        )
         all_label_features.append(label_entropy)
 
     if 1 in most_common_sentence_labels and -1 in most_common_sentence_labels:
@@ -125,10 +183,12 @@ for item in _items[1000:]:
         difficulty_level = 3
         difficulty_level_3.append(result)
 
-correlation = np.corrcoef(
-    np.array(all_claim_features), np.array(all_label_features)
-)[0, 1]
+correlation = np.corrcoef(np.array(all_claim_features), np.array(all_label_features))[
+    0, 1
+]
 
+percentage_of_consistent_annotations = intra_annotator_agreement / (intra_annotator_agreement + intra_annotator_disagreement)
+percentage_of_consistent_annotations_with_negation = intra_annotator_agreement_with_negation / (intra_annotator_agreement_with_negation + intra_annotator_disagreement_with_negation)
 
 print(
     len(difficulty_level_0),

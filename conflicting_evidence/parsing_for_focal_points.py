@@ -13,7 +13,7 @@ _items = list(f)
 
 
 def find_subtrees(sentence):
-    sentence = "During the 2008 Summer Olympics the age of four Chinese gymnasts — He Kexin, Jiang Yuyuan, Deng Linlin, and Yang Yilin — was brought into question, with many foreign media outlets speculating that they were underage during the Olympics."
+    sentence = "Catherine Chandler (played by Linda Hamilton) is abducted, beaten, slashed and left to die in Central Park because she was inadvertently mistaken for somebody else."    
     subtrees = []
     tokens = nlp(sentence)
     for token in tokens:
