@@ -25,7 +25,7 @@ for item in _items:
             conflicting_evidence_items.append(result)
         multiple_evidence += 1
     premise = result["example"]["premise"]
-    hypothesis = result["example"]["premise"]
+    hypothesis = result["example"]["hypothesis"]
 
     result["subtrees_from_premise"] = find_subtrees(premise)
     result["subtrees_from_hypothesis"] = find_subtrees(hypothesis)

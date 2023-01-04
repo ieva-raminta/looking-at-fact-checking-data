@@ -102,8 +102,6 @@ for item in parsed_chaosnli_items:
                 predicted_label = mnli_labels_to_nli[predicted_class_id]
                 if predicted_label in highest_confidence["score"] and confidence > highest_confidence["score"][predicted_label]:
                     edit = hypothesis[subtrees_from_hypothesis[cropped_id][0]:subtrees_from_hypothesis[cropped_id][1]]
-                    if edit == "": 
-                        pdb.set_trace()
                     edited_item = (premise, cropped_hypothesis, predicted_label, edit, "cropped_hypothesis")
                     highest_confidence["score"][predicted_label] = confidence
                     highest_confidence["edited_item"][predicted_label] = edited_item
