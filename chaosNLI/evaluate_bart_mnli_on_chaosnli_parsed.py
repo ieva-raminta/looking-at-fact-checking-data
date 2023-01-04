@@ -107,7 +107,7 @@ for item in parsed_chaosnli_items:
                     highest_confidence["edited_item"][predicted_label] = edited_item
 
         pdb.set_trace()
-        parsed_dataset.append(edited_item)
+        parsed_dataset.append(highest_confidence)
 
 
 
