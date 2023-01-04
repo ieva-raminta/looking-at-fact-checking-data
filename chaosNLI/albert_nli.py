@@ -13,7 +13,13 @@ import pandas as pd
 import os
 import numpy as np
 import evaluate
-from datasets import load_dataset, load_from_disk, concatenate_datasets, ClassLabel, Value
+from datasets import (
+    load_dataset,
+    load_from_disk,
+    concatenate_datasets,
+    ClassLabel,
+    Value,
+)
 
 metric = evaluate.load("accuracy")
 training_args = TrainingArguments(
@@ -57,19 +63,21 @@ loaded_fever.rename_column("claim", "hypothesis")
 def include_wiki_evidence(example):
     try:
         page_index = loaded_wiki_pages["wikipedia_pages"]["id"].index(
-        example["evidence_wiki_url"]
+            example["evidence_wiki_url"]
         )
-    except: 
+    except:
         page_index = False
-    if page_index: 
-        page_lines = loaded_wiki_pages["wikipedia_pages"]["lines"][page_index].splitlines()
+    if page_index:
+        page_lines = loaded_wiki_pages["wikipedia_pages"]["lines"][
+            page_index
+        ].splitlines()
         if len(page_lines) == 0:
             example["premise"] = ""
         elif example["evidence_sentence_id"] < len(page_lines):
             example["premise"] = page_lines[example["evidence_sentence_id"]]
         else:
             example["premise"] = page_lines[-1]
-    else: 
+    else:
         example["premise"] = ""
 
     return example

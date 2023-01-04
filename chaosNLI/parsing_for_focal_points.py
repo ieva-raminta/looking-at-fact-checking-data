@@ -1,19 +1,18 @@
 import json
 import spacy
 
-nlp = spacy.load("en_core_web_sm")
+nlp = spacy.load("en_core_web_lg")
 
 
 def flatten(l):
     return [item for sublist in l for item in sublist]
 
 
-f = open("nat_claims_dev.jsonl")
-_items = list(f)
+#f = open("nat_claims_dev.jsonl")
+#_items = list(f)
 
 
 def find_subtrees(sentence):
-    sentence = "Catherine Chandler (played by Linda Hamilton) is abducted, beaten, slashed and left to die in Central Park because she was inadvertently mistaken for somebody else."    
     subtrees = []
     tokens = nlp(sentence)
     for token in tokens:
@@ -36,9 +35,15 @@ def find_subtrees(sentence):
                 "agent",
                 "compound",
             ]:
-                subtrees.append([t for t in token.subtree])
+                token_start_index = [t.idx for t in token.subtree] 
+                token_end_index = [t.idx + len(t) for t in token.subtree] 
+                subtrees.append((min(token_start_index), max(token_end_index)))
+                print()
             if token.dep_ in ["relcl", "advcl", "ccomp"]:
-                subtrees.append([t for t in token.subtree])
+                token_start_index = [t.idx for t in token.subtree] 
+                token_end_index = [t.idx + len(t) for t in token.subtree] 
+                subtrees.append((min(token_start_index), max(token_end_index)))
+                print()
             if token.lemma_ in [
                 "think",
                 "believe",
@@ -67,23 +72,23 @@ def find_subtrees(sentence):
                 if embedded_verb:
                     embedded_clause = [t for t in embedded_verb[0].subtree]
                     full_clause = [t for t in token.subtree]
-                    hedge_clause = [
-                        token
-                        for token in tokens
-                        if token in full_clause and token not in embedded_clause
-                    ]
-
-                    subtrees.append(hedge_clause)
+                    token_start_index = [t.idx for t in tokens if t in full_clause and t not in embedded_clause] 
+                    token_end_index = [t.idx + len(t) for t in tokens if t in full_clause and t not in embedded_clause] 
+                    subtrees.append((min(token_start_index), max(token_end_index)))
+                    print()
             if token.pos_ in ["CCONJ"]:
                 conjuncts = [t for t in tokens if t.dep_ == "conj"]
                 for conjunct in conjuncts:
                     if token.head == conjunct.head:
-                        subtrees.append(
-                            [t for t in token.subtree] + [t for t in conjunct.subtree]
-                        )
+                        token_start_index = [t.idx for t in token.subtree] + [t.idx for t in conjunct.subtree]
+                        token_end_index = [t.idx + len(t) for t in token.subtree] + [t.idx + len(t) for t in conjunct.subtree]
+                        subtrees.append((min(token_start_index), max(token_end_index)))
+                        print()
+
     return subtrees
 
 
+"""
 for item in _items:
     result = json.loads(item)
     claim = result["claim"]
@@ -96,3 +101,4 @@ for item in _items:
     for sentence_annotation in sentence_annotations:
         sentence = [s for s in sentence_annotation.keys()][0]
         sentence_subtrees = find_subtrees(sentence)
+"""
