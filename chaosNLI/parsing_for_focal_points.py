@@ -8,8 +8,8 @@ def flatten(l):
     return [item for sublist in l for item in sublist]
 
 
-#f = open("nat_claims_dev.jsonl")
-#_items = list(f)
+# f = open("nat_claims_dev.jsonl")
+# _items = list(f)
 
 
 def find_subtrees(sentence):
@@ -35,13 +35,13 @@ def find_subtrees(sentence):
                 "agent",
                 "compound",
             ]:
-                token_start_index = [t.idx for t in token.subtree] 
-                token_end_index = [t.idx + len(t) for t in token.subtree] 
+                token_start_index = [t.idx for t in token.subtree]
+                token_end_index = [t.idx + len(t) for t in token.subtree]
                 subtrees.append((min(token_start_index), max(token_end_index)))
                 print()
             if token.dep_ in ["relcl", "advcl", "ccomp"]:
-                token_start_index = [t.idx for t in token.subtree] 
-                token_end_index = [t.idx + len(t) for t in token.subtree] 
+                token_start_index = [t.idx for t in token.subtree]
+                token_end_index = [t.idx + len(t) for t in token.subtree]
                 subtrees.append((min(token_start_index), max(token_end_index)))
                 print()
             if token.lemma_ in [
@@ -72,16 +72,28 @@ def find_subtrees(sentence):
                 if embedded_verb:
                     embedded_clause = [t for t in embedded_verb[0].subtree]
                     full_clause = [t for t in token.subtree]
-                    token_start_index = [t.idx for t in tokens if t in full_clause and t not in embedded_clause] 
-                    token_end_index = [t.idx + len(t) for t in tokens if t in full_clause and t not in embedded_clause] 
+                    token_start_index = [
+                        t.idx
+                        for t in tokens
+                        if t in full_clause and t not in embedded_clause
+                    ]
+                    token_end_index = [
+                        t.idx + len(t)
+                        for t in tokens
+                        if t in full_clause and t not in embedded_clause
+                    ]
                     subtrees.append((min(token_start_index), max(token_end_index)))
                     print()
             if token.pos_ in ["CCONJ"]:
                 conjuncts = [t for t in tokens if t.dep_ == "conj"]
                 for conjunct in conjuncts:
                     if token.head == conjunct.head:
-                        token_start_index = [t.idx for t in token.subtree] + [t.idx for t in conjunct.subtree]
-                        token_end_index = [t.idx + len(t) for t in token.subtree] + [t.idx + len(t) for t in conjunct.subtree]
+                        token_start_index = [t.idx for t in token.subtree] + [
+                            t.idx for t in conjunct.subtree
+                        ]
+                        token_end_index = [t.idx + len(t) for t in token.subtree] + [
+                            t.idx + len(t) for t in conjunct.subtree
+                        ]
                         subtrees.append((min(token_start_index), max(token_end_index)))
                         print()
 

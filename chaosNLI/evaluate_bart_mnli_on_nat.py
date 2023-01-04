@@ -65,7 +65,7 @@ tokenized_nat_dev = [
 true_labels = [i["label"] for i in nat_dataset]
 predicted_labels = []
 
-mnli_labels_to_nat = {0:-1, 1:0, 2:1}
+mnli_labels_to_nat = {0: -1, 1: 0, 2: 1}
 
 for inputid, inputs in enumerate(tokenized_nat_dev):
     with torch.no_grad():
@@ -78,5 +78,3 @@ for inputid, inputs in enumerate(tokenized_nat_dev):
 f1 = f1_score(np.array(true_labels), np.array(predicted_labels))
 print(f1)
 pdb.set_trace()
-
-

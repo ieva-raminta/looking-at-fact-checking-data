@@ -47,13 +47,13 @@ for item in _items:
     disagreement_between_sentences = False
     result = json.loads(item)
     claim = result["claim"]
-    
+
     claim_words = claim.split()
     negation_words = ["never", "no", "not", "cannot"]
     claim_contains_negation = (
         True if intersection(claim_words, negation_words) else False
     )
-    
+
     sentence_annotations = [{r[-1]: r[0]} for r in result["annotations"].values()]
 
     item_annotations = flatten([annot[0] for annot in result["annotations"].values()])
@@ -93,11 +93,11 @@ for item in _items:
                 or (item_annot_dict[key] == 0 and block_annot_dict[key] == "NEUTRAL")
             ):
                 intra_annotator_agreement += 1
-                if claim_contains_negation: 
+                if claim_contains_negation:
                     intra_annotator_agreement_with_negation += 1
             else:
                 intra_annotator_disagreement += 1
-                if claim_contains_negation: 
+                if claim_contains_negation:
                     intra_annotator_disagreement_with_negation += 1
 
     # I don't understand why there are multiple keys here
@@ -111,7 +111,6 @@ for item in _items:
     supporting_sentences = []
     supporting_sentences_label_distribution = []
     refuting_sentences_label_distribution = []
-
 
     for sentence_annotation in sentence_annotations:
         list_of_labels = [s for s in sentence_annotation.values()][0]
@@ -187,8 +186,16 @@ correlation = np.corrcoef(np.array(all_claim_features), np.array(all_label_featu
     0, 1
 ]
 
-percentage_of_consistent_annotations = intra_annotator_agreement / (intra_annotator_agreement + intra_annotator_disagreement)
-percentage_of_consistent_annotations_with_negation = intra_annotator_agreement_with_negation / (intra_annotator_agreement_with_negation + intra_annotator_disagreement_with_negation)
+percentage_of_consistent_annotations = intra_annotator_agreement / (
+    intra_annotator_agreement + intra_annotator_disagreement
+)
+percentage_of_consistent_annotations_with_negation = (
+    intra_annotator_agreement_with_negation
+    / (
+        intra_annotator_agreement_with_negation
+        + intra_annotator_disagreement_with_negation
+    )
+)
 
 print(
     len(difficulty_level_0),
