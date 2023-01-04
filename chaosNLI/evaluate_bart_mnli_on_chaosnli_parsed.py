@@ -67,7 +67,9 @@ for item in parsed_chaosnli_items:
         if "n" in result["label_counter"]:
             neutral_counter = result["label_counter"]["n"]
             highest_confidence["score"]["n"] = 0
-    
+   
+        highest_confidence["label_counter"] = result["label_counter"]
+
         majority_label_confidence = result["label_counter"][majority_label] / 100
         highest_confidence["score"][majority_label] = 1
         highest_confidence["edited_item"][majority_label] = (premise, hypothesis, majority_label_confidence, "", "original")
@@ -110,6 +112,8 @@ for item in parsed_chaosnli_items:
         parsed_dataset.append(highest_confidence)
 
 
+with open("parsed_chaosnli_evaluated_with_bart_trained_on_mnli.json", "w") as outfile:
+    json.dump(parsed_dataset, outfile)
 
 
 
