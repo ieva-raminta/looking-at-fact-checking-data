@@ -68,7 +68,7 @@ for item in parsed_chaosnli_items:
             neutral_counter = result["label_counter"]["n"]
             highest_confidence["score"]["n"] = 0
     
-        majority_label_confidence = result["label_counter"][majority_label]
+        majority_label_confidence = result["label_counter"][majority_label] / 100
         highest_confidence["score"][majority_label] = 1
         highest_confidence["edited_item"][majority_label] = (premise, hypothesis, majority_label_confidence, "", "original")
 
@@ -83,7 +83,7 @@ for item in parsed_chaosnli_items:
                 tokenized_premhyp = tokenizer(cropped_premise, hypothesis, return_tensors="pt")
                 with torch.no_grad():
                     logits = model(**tokenized_premhyp).logits
-                confidence = logits.max().item()
+                confidence = logits.softmax(-1).max().item()
                 predicted_class_id = logits.argmax().item()
                 predicted_label = mnli_labels_to_nli[predicted_class_id]
                 if predicted_label in highest_confidence["score"] and confidence > highest_confidence["score"][predicted_label]: 
@@ -97,11 +97,13 @@ for item in parsed_chaosnli_items:
                 tokenized_premhyp = tokenizer(premise, cropped_hypothesis, return_tensors="pt")
                 with torch.no_grad():
                     logits = model(**tokenized_premhyp).logits
-                confidence = logits.softmax.max().item()
+                confidence = logits.softmax(-1).max().item()
                 predicted_class_id = logits.argmax().item()
                 predicted_label = mnli_labels_to_nli[predicted_class_id]
                 if predicted_label in highest_confidence["score"] and confidence > highest_confidence["score"][predicted_label]:
                     edit = hypothesis[subtrees_from_premise[cropped_id][0]:subtrees_from_hypothesis[cropped_id][1]]
+                    if edit == "": 
+                        pdb.set_trace()
                     edited_item = (premise, cropped_hypothesis, predicted_label, edit, "cropped_hypothesis")
                     highest_confidence["score"][predicted_label] = confidence
                     highest_confidence["edited_item"][predicted_label] = edited_item
