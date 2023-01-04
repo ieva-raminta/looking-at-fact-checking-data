@@ -97,7 +97,7 @@ for item in parsed_chaosnli_items:
                 tokenized_premhyp = tokenizer(premise, cropped_hypothesis, return_tensors="pt")
                 with torch.no_grad():
                     logits = model(**tokenized_premhyp).logits
-                confidence = logits.max().item()
+                confidence = logits.softmax.max().item()
                 predicted_class_id = logits.argmax().item()
                 predicted_label = mnli_labels_to_nli[predicted_class_id]
                 if predicted_label in highest_confidence["score"] and confidence > highest_confidence["score"][predicted_label]:
@@ -111,11 +111,5 @@ for item in parsed_chaosnli_items:
 
 
 
-for inputid, inputs in enumerate(tokenized_nat_dev):
-    with torch.no_grad():
-        logits = model(**inputs).logits
-
-    predicted_class_id = logits.argmax().item()
-    model.config.id2label[predicted_class_id]
 
 
