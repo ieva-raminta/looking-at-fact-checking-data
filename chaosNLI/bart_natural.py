@@ -24,7 +24,7 @@ from datasets import (
 )
 from sklearn.metrics import f1_score
 from collections import Counter
-
+from datasets import Dataset
 
 def load_natural_datasets(filename):
     f = open(filename)
