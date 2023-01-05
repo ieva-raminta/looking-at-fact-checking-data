@@ -38,12 +38,10 @@ def find_subtrees(sentence):
                 token_start_index = [t.idx for t in token.subtree]
                 token_end_index = [t.idx + len(t) for t in token.subtree]
                 subtrees.append((min(token_start_index), max(token_end_index)))
-                print()
             if token.dep_ in ["relcl", "advcl", "ccomp"]:
                 token_start_index = [t.idx for t in token.subtree]
                 token_end_index = [t.idx + len(t) for t in token.subtree]
                 subtrees.append((min(token_start_index), max(token_end_index)))
-                print()
             if token.lemma_ in [
                 "think",
                 "believe",
@@ -83,7 +81,6 @@ def find_subtrees(sentence):
                         if t in full_clause and t not in embedded_clause
                     ]
                     subtrees.append((min(token_start_index), max(token_end_index)))
-                    print()
             if token.pos_ in ["CCONJ"]:
                 conjuncts = [t for t in tokens if t.dep_ == "conj"]
                 for conjunct in conjuncts:
@@ -95,7 +92,6 @@ def find_subtrees(sentence):
                             t.idx + len(t) for t in conjunct.subtree
                         ]
                         subtrees.append((min(token_start_index), max(token_end_index)))
-                        print()
 
     return subtrees
 
