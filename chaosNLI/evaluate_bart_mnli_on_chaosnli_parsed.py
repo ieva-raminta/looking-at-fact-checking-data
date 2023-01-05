@@ -60,8 +60,9 @@ for item in parsed_chaosnli_items:
             edited_dataset["edited_item"]["c"] = (
                 premise,
                 hypothesis,
-                "",
                 "c",
+                None, 
+                "", 
                 "original",
             )
         if "e" in result["label_counter"]:
@@ -69,8 +70,9 @@ for item in parsed_chaosnli_items:
             edited_dataset["edited_item"]["e"] = (
                 premise,
                 hypothesis,
-                "",
                 "e",
+                None, 
+                "", 
                 "original",
             )
         if "n" in result["label_counter"]:
@@ -78,8 +80,9 @@ for item in parsed_chaosnli_items:
             edited_dataset["edited_item"]["n"] = (
                 premise,
                 hypothesis,
-                "",
                 "n",
+                None, 
+                "", 
                 "original",
             )
 
@@ -112,6 +115,7 @@ for item in parsed_chaosnli_items:
                         cropped_premise,
                         hypothesis,
                         predicted_label,
+                        (subtrees_from_premise[cropped_id][0],subtrees_from_premise[cropped_id][1]),
                         edit,
                         "cropped premise",
                     )
@@ -140,6 +144,7 @@ for item in parsed_chaosnli_items:
                         premise,
                         cropped_hypothesis,
                         predicted_label,
+                        (subtrees_from_hypothesis[cropped_id][0],subtrees_from_hypothesis[cropped_id][1]),
                         edit,
                         "cropped_hypothesis",
                     )
