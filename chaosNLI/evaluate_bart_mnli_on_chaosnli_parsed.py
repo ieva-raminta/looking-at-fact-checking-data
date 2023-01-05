@@ -57,13 +57,31 @@ for item in parsed_chaosnli_items:
 
         if "c" in result["label_counter"]:
             highest_confidence["score"]["c"] = result["label_counter"]["c"] / 100
-            highest_confidence["edited_item"]["c"] = (premise, hypothesis, "", "c",  "original")
+            highest_confidence["edited_item"]["c"] = (
+                premise,
+                hypothesis,
+                "",
+                "c",
+                "original",
+            )
         if "e" in result["label_counter"]:
             highest_confidence["score"]["e"] = result["label_counter"]["e"] / 100
-            highest_confidence["edited_item"]["e"] = (premise, hypothesis, "", "e", "original")
+            highest_confidence["edited_item"]["e"] = (
+                premise,
+                hypothesis,
+                "",
+                "e",
+                "original",
+            )
         if "n" in result["label_counter"]:
             highest_confidence["score"]["n"] = result["label_counter"]["n"] / 100
-            highest_confidence["edited_item"]["n"] = (premise, hypothesis, "", "n", "original")
+            highest_confidence["edited_item"]["n"] = (
+                premise,
+                hypothesis,
+                "",
+                "n",
+                "original",
+            )
 
         if "subtrees_from_premise" in result.keys():
             subtrees_from_premise = result["subtrees_from_premise"]
@@ -132,5 +150,7 @@ for item in parsed_chaosnli_items:
         parsed_dataset.append(highest_confidence)
 
 
-with open("parsed_chaosnli_evaluated_with_bart_trained_on_mnli_no_majority.json", "w") as outfile:
+with open(
+    "parsed_chaosnli_evaluated_with_bart_trained_on_mnli_no_majority.json", "w"
+) as outfile:
     json.dump(parsed_dataset, outfile)

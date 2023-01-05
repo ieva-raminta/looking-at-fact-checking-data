@@ -178,7 +178,9 @@ pdb.set_trace()
 f1_none = f1_score(np.array(true_labels), np.array(predicted_labels), average=None)
 f1_micro = f1_score(np.array(true_labels), np.array(predicted_labels), average="micro")
 f1_macro = f1_score(np.array(true_labels), np.array(predicted_labels), average="macro")
-f1_weighted = f1_score(np.array(true_labels), np.array(predicted_labels), average="weighted")
+f1_weighted = f1_score(
+    np.array(true_labels), np.array(predicted_labels), average="weighted"
+)
 
 print("None")
 print(f1_none)
