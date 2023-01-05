@@ -20,8 +20,15 @@ from datasets import (
 from sklearn.metrics import f1_score
 from collections import Counter
 
+input_file = "parsed_natural_train.json"
+output_file = (
+    "parsed_natural_train_evaluated_with_bart_trained_on_mnli_no_majority.json"
+)
 
-f = open("parsed_natural_train.json")
+# input_file = "parsed_chaosnli.json"
+# output_file = "parsed_chaosnli_evaluated_with_bart_trained_on_mnli_no_majority.json"
+
+f = open(input_file)
 parsed_chaosnli_items = list(f)
 
 
@@ -38,6 +45,7 @@ else:
     device = torch.device("cpu")
 
 mnli_labels_to_nli = {0: "c", 1: "n", 2: "e"}
+
 
 parsed_dataset = []
 for item in parsed_chaosnli_items:
@@ -160,7 +168,5 @@ for item in parsed_chaosnli_items:
         parsed_dataset.append(edited_dataset)
 
 
-with open(
-    "parsed_natural_train_evaluated_with_bart_trained_on_mnli_no_majority.json", "w"
-) as outfile:
+with open(output_file, "w") as outfile:
     json.dump(parsed_dataset, outfile)
