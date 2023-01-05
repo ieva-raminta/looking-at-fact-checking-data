@@ -61,8 +61,8 @@ for item in parsed_chaosnli_items:
                 premise,
                 hypothesis,
                 "c",
-                None, 
-                "", 
+                None,
+                "",
                 "original",
             )
         if "e" in result["label_counter"]:
@@ -71,8 +71,8 @@ for item in parsed_chaosnli_items:
                 premise,
                 hypothesis,
                 "e",
-                None, 
-                "", 
+                None,
+                "",
                 "original",
             )
         if "n" in result["label_counter"]:
@@ -81,8 +81,8 @@ for item in parsed_chaosnli_items:
                 premise,
                 hypothesis,
                 "n",
-                None, 
-                "", 
+                None,
+                "",
                 "original",
             )
 
@@ -115,7 +115,10 @@ for item in parsed_chaosnli_items:
                         cropped_premise,
                         hypothesis,
                         predicted_label,
-                        (subtrees_from_premise[cropped_id][0],subtrees_from_premise[cropped_id][1]),
+                        (
+                            subtrees_from_premise[cropped_id][0],
+                            subtrees_from_premise[cropped_id][1],
+                        ),
                         edit,
                         "cropped premise",
                     )
@@ -144,7 +147,10 @@ for item in parsed_chaosnli_items:
                         premise,
                         cropped_hypothesis,
                         predicted_label,
-                        (subtrees_from_hypothesis[cropped_id][0],subtrees_from_hypothesis[cropped_id][1]),
+                        (
+                            subtrees_from_hypothesis[cropped_id][0],
+                            subtrees_from_hypothesis[cropped_id][1],
+                        ),
                         edit,
                         "cropped_hypothesis",
                     )

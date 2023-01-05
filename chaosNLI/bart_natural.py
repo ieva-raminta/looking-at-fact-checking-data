@@ -26,6 +26,7 @@ from sklearn.metrics import f1_score
 from collections import Counter
 from datasets import Dataset
 
+
 def load_natural_datasets(filename):
     f = open(filename)
     nat_claims_items = list(f)
@@ -44,12 +45,13 @@ def load_natural_datasets(filename):
                 premise = evidence
                 hypothesis = claim
                 label = most_common_label
-    
+
                 nat_dataset.append(
                     {"premise": premise, "hypothesis": hypothesis, "label": label}
                 )
     nat_Dataset = Dataset.from_list(nat_dataset)
     return nat_Dataset
+
 
 nat_dev_dataset = load_natural_datasets("nat_claims_dev.jsonl")
 nat_train_dataset = load_natural_datasets("nat_claims_train.jsonl")
@@ -61,7 +63,7 @@ training_args = TrainingArguments(
     num_train_epochs=30,
 )
 
-#LABEL_MAP = {"entailment": 0, "neutral": 1, "contradiction": 2, "hidden": 0}
+# LABEL_MAP = {"entailment": 0, "neutral": 1, "contradiction": 2, "hidden": 0}
 
 
 def compute_metrics(eval_pred):
@@ -82,13 +84,13 @@ else:
     print("No GPU available, using the CPU instead.")
     device = torch.device("cpu")
 
-#loaded_mnli = load_dataset("multi_nli")
+# loaded_mnli = load_dataset("multi_nli")
 # loaded_fever = load_dataset("fever", "v1.0")
 # loaded_wiki_pages = load_dataset("fever", "wiki_pages")
 # loaded_fever.rename_column("claim", "hypothesis")
 
 
-#def include_wiki_evidence(example):
+# def include_wiki_evidence(example):
 #    try:
 #        page_index = loaded_wiki_pages["wikipedia_pages"]["id"].index(
 #            example["evidence_wiki_url"]
@@ -111,7 +113,7 @@ else:
 #    return example
 
 
-#def map_labels(example):
+# def map_labels(example):
 #    the_map = {"NOT ENOUGH INFO": 1, "SUPPORTS": 0, "REFUTES": 2}
 #    if example["label"] not in the_map.keys():
 #        example["label"] = 1
@@ -134,7 +136,7 @@ else:
 #        "evidence_sentence_id",
 #    ]
 # )
-#loaded_mnli = loaded_mnli.remove_columns(
+# loaded_mnli = loaded_mnli.remove_columns(
 #    [
 #        "promptID",
 #        "pairID",
@@ -144,7 +146,7 @@ else:
 #        "hypothesis_parse",
 #        "genre",
 #    ]
-#)
+# )
 
 # assert loaded_mnli.features.type == loaded_fever_with_wiki.features.type
 # nli_dataset = concatenate_datasets([loaded_mnli, loaded_fever_with_wiki])
@@ -154,23 +156,23 @@ def tokenize_function(examples):
     return tokenizer(examples["premise"], examples["hypothesis"], padding="max_length")
 
 
-#tokenized_mnli = loaded_mnli.map(tokenize_function, batched=True)
-#train_dataset = tokenized_mnli["train"].shuffle(seed=42)
+# tokenized_mnli = loaded_mnli.map(tokenize_function, batched=True)
+# train_dataset = tokenized_mnli["train"].shuffle(seed=42)
 # eval_dataset = tokenized_mnli["validation_matched"].shuffle(seed=42)
 pdb.set_trace()
 
 tokenized_nat_dev = nat_dev_dataset.map(tokenize_function, batched=True)
 tokenized_nat_train = nat_train_dataset.map(tokenize_function, batched=True)
 
-#true_dev_labels = [i["label"] for i in nat_dev_dataset]
-#predicted_dev_labels = []
+# true_dev_labels = [i["label"] for i in nat_dev_dataset]
+# predicted_dev_labels = []
 
-#true_train_labels = [i["label"] for i in nat_train_dataset]
-#predicted_train_labels = []
+# true_train_labels = [i["label"] for i in nat_train_dataset]
+# predicted_train_labels = []
 
-#mnli_labels_to_nat = {0: -1, 1: 0, 2: 1}
+# mnli_labels_to_nat = {0: -1, 1: 0, 2: 1}
 
-#for inputid, inputs in enumerate(tokenized_nat_dev):
+# for inputid, inputs in enumerate(tokenized_nat_dev):
 #    with torch.no_grad():
 #        logits = model(**inputs).logits
 #
@@ -178,27 +180,27 @@ tokenized_nat_train = nat_train_dataset.map(tokenize_function, batched=True)
 #    model.config.id2label[predicted_class_id]
 #    predicted_labels.append(mnli_labels_to_nat[predicted_class_id])
 
-#pdb.set_trace()
+# pdb.set_trace()
 
-#f1_none_dev = f1_score(np.array(true_dev_labels), np.array(predicted_dev_labels), average=None)
-#f1_micro_dev = f1_score(np.array(true_dev_labels), np.array(predicted_dev_labels), average="micro")
-#f1_macro_dev = f1_score(np.array(true_dev_labels), np.array(predicted_dev_labels), average="macro")
-#f1_weighted_dev = f1_score(
+# f1_none_dev = f1_score(np.array(true_dev_labels), np.array(predicted_dev_labels), average=None)
+# f1_micro_dev = f1_score(np.array(true_dev_labels), np.array(predicted_dev_labels), average="micro")
+# f1_macro_dev = f1_score(np.array(true_dev_labels), np.array(predicted_dev_labels), average="macro")
+# f1_weighted_dev = f1_score(
 #    np.array(true_dev_labels), np.array(predicted_dev_labels), average="weighted"
-#)
+# )
 
-#print("None")
-#print(f1_none_dev)
-#print("micro")
-#print(f1_micro_dev)
-#print("macro")
-#print(f1_macro_dev)
-#print("weighted")
-#print(f1_weighted_dev)
+# print("None")
+# print(f1_none_dev)
+# print("micro")
+# print(f1_micro_dev)
+# print("macro")
+# print(f1_macro_dev)
+# print("weighted")
+# print(f1_weighted_dev)
 
-#pdb.set_trace()
+# pdb.set_trace()
 
-#train_dataset = pd.DataFrame.from_records()
+# train_dataset = pd.DataFrame.from_records()
 
 trainer = Trainer(
     model=model,
@@ -206,11 +208,10 @@ trainer = Trainer(
     train_dataset=tokenized_nat_train,
     eval_dataset=tokenized_nat_dev,
     compute_metrics=compute_metrics,
- )
+)
 
 trainer.train()
 
 trainer.save_model("trained_bart_on_nat_claims")
 
 pdb.set_trace()
-
