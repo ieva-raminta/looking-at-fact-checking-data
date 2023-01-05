@@ -27,6 +27,8 @@ from collections import Counter
 from datasets import Dataset
 
 
+label_map = {-1: 0, 0: 1, 1: 2}
+
 def load_natural_datasets(filename):
     f = open(filename)
     nat_claims_items = list(f)
@@ -44,7 +46,7 @@ def load_natural_datasets(filename):
 
                 premise = evidence
                 hypothesis = claim
-                label = most_common_label
+                label = label_map[most_common_label]
 
                 nat_dataset.append(
                     {"premise": premise, "hypothesis": hypothesis, "label": label}
@@ -60,7 +62,7 @@ metric = evaluate.load("accuracy")
 training_args = TrainingArguments(
     output_dir="trained_bart_on_nat_claims_dir",
     evaluation_strategy="epoch",
-    num_train_epochs=30,
+    num_train_epochs=50,
 )
 
 # LABEL_MAP = {"entailment": 0, "neutral": 1, "contradiction": 2, "hidden": 0}
