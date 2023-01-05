@@ -45,10 +45,10 @@ for item in parsed_chaosnli_items:
 
     for result in results:
 
-        highest_confidence = {}
-        highest_confidence["score"] = {}
+        edited_dataset = {}
+        edited_dataset["score"] = {}
         edited_item = None
-        highest_confidence["edited_item"] = {}
+        edited_dataset["edited_item"] = {}
 
         premise = result["example"]["premise"]
         hypothesis = result["example"]["hypothesis"]
@@ -56,8 +56,8 @@ for item in parsed_chaosnli_items:
         idx = result["uid"]
 
         if "c" in result["label_counter"]:
-            highest_confidence["score"]["c"] = result["label_counter"]["c"] / 100
-            highest_confidence["edited_item"]["c"] = (
+            edited_dataset["score"]["c"] = result["label_counter"]["c"] / 100
+            edited_dataset["edited_item"]["c"] = (
                 premise,
                 hypothesis,
                 "",
@@ -65,8 +65,8 @@ for item in parsed_chaosnli_items:
                 "original",
             )
         if "e" in result["label_counter"]:
-            highest_confidence["score"]["e"] = result["label_counter"]["e"] / 100
-            highest_confidence["edited_item"]["e"] = (
+            edited_dataset["score"]["e"] = result["label_counter"]["e"] / 100
+            edited_dataset["edited_item"]["e"] = (
                 premise,
                 hypothesis,
                 "",
@@ -74,8 +74,8 @@ for item in parsed_chaosnli_items:
                 "original",
             )
         if "n" in result["label_counter"]:
-            highest_confidence["score"]["n"] = result["label_counter"]["n"] / 100
-            highest_confidence["edited_item"]["n"] = (
+            edited_dataset["score"]["n"] = result["label_counter"]["n"] / 100
+            edited_dataset["edited_item"]["n"] = (
                 premise,
                 hypothesis,
                 "",
@@ -100,8 +100,8 @@ for item in parsed_chaosnli_items:
                 predicted_class_id = logits.argmax().item()
                 predicted_label = mnli_labels_to_nli[predicted_class_id]
                 if (
-                    predicted_label in highest_confidence["score"]
-                    and confidence > highest_confidence["score"][predicted_label]
+                    predicted_label in edited_dataset["score"]
+                    and confidence > edited_dataset["score"][predicted_label]
                 ):
                     edit = premise[
                         subtrees_from_premise[cropped_id][0] : subtrees_from_premise[
@@ -115,8 +115,8 @@ for item in parsed_chaosnli_items:
                         edit,
                         "cropped premise",
                     )
-                    highest_confidence["score"][predicted_label] = confidence
-                    highest_confidence["edited_item"][predicted_label] = edited_item
+                    edited_dataset["score"][predicted_label] = confidence
+                    edited_dataset["edited_item"][predicted_label] = edited_item
 
             for cropped_id, cropped_hypothesis in enumerate(cropped_hypotheses):
                 tokenized_premhyp = tokenizer(
@@ -128,8 +128,8 @@ for item in parsed_chaosnli_items:
                 predicted_class_id = logits.argmax().item()
                 predicted_label = mnli_labels_to_nli[predicted_class_id]
                 if (
-                    predicted_label in highest_confidence["score"]
-                    and confidence > highest_confidence["score"][predicted_label]
+                    predicted_label in edited_dataset["score"]
+                    and confidence > edited_dataset["score"][predicted_label]
                 ):
                     edit = hypothesis[
                         subtrees_from_hypothesis[cropped_id][
@@ -143,11 +143,11 @@ for item in parsed_chaosnli_items:
                         edit,
                         "cropped_hypothesis",
                     )
-                    highest_confidence["score"][predicted_label] = confidence
-                    highest_confidence["edited_item"][predicted_label] = edited_item
+                    edited_dataset["score"][predicted_label] = confidence
+                    edited_dataset["edited_item"][predicted_label] = edited_item
 
         pdb.set_trace()
-        parsed_dataset.append(highest_confidence)
+        parsed_dataset.append(edited_dataset)
 
 
 with open(
