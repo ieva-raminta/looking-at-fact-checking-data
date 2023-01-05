@@ -159,7 +159,6 @@ def tokenize_function(examples):
 # tokenized_mnli = loaded_mnli.map(tokenize_function, batched=True)
 # train_dataset = tokenized_mnli["train"].shuffle(seed=42)
 # eval_dataset = tokenized_mnli["validation_matched"].shuffle(seed=42)
-pdb.set_trace()
 
 tokenized_nat_dev = nat_dev_dataset.map(tokenize_function, batched=True)
 tokenized_nat_train = nat_train_dataset.map(tokenize_function, batched=True)
@@ -180,7 +179,6 @@ tokenized_nat_train = nat_train_dataset.map(tokenize_function, batched=True)
 #    model.config.id2label[predicted_class_id]
 #    predicted_labels.append(mnli_labels_to_nat[predicted_class_id])
 
-# pdb.set_trace()
 
 # f1_none_dev = f1_score(np.array(true_dev_labels), np.array(predicted_dev_labels), average=None)
 # f1_micro_dev = f1_score(np.array(true_dev_labels), np.array(predicted_dev_labels), average="micro")
@@ -198,7 +196,6 @@ tokenized_nat_train = nat_train_dataset.map(tokenize_function, batched=True)
 # print("weighted")
 # print(f1_weighted_dev)
 
-# pdb.set_trace()
 
 # train_dataset = pd.DataFrame.from_records()
 
@@ -214,4 +211,3 @@ trainer.train()
 
 trainer.save_model("trained_bart_on_nat_claims")
 
-pdb.set_trace()
