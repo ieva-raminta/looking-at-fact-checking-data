@@ -29,6 +29,7 @@ from datasets import Dataset
 
 label_map = {-1: 0, 0: 1, 1: 2}
 
+
 def load_natural_datasets(filename):
     f = open(filename)
     nat_claims_items = list(f)
@@ -58,11 +59,14 @@ def load_natural_datasets(filename):
 nat_dev_dataset = load_natural_datasets("nat_claims_dev.jsonl")
 nat_train_dataset = load_natural_datasets("nat_claims_train.jsonl")
 
+pdb.set_trace()
+
 metric = evaluate.load("accuracy")
 training_args = TrainingArguments(
     output_dir="trained_bart_on_nat_claims_dir",
     evaluation_strategy="epoch",
-    num_train_epochs=50,
+    num_train_epochs=5,
+    per_device_train_batch_size=32,
 )
 
 # LABEL_MAP = {"entailment": 0, "neutral": 1, "contradiction": 2, "hidden": 0}
@@ -165,6 +169,8 @@ def tokenize_function(examples):
 tokenized_nat_dev = nat_dev_dataset.map(tokenize_function, batched=True)
 tokenized_nat_train = nat_train_dataset.map(tokenize_function, batched=True)
 
+pdb.set_trace()
+
 # true_dev_labels = [i["label"] for i in nat_dev_dataset]
 # predicted_dev_labels = []
 
@@ -212,4 +218,3 @@ trainer = Trainer(
 trainer.train()
 
 trainer.save_model("trained_bart_on_nat_claims")
-

@@ -60,8 +60,6 @@ for item in parsed_chaosnli_items:
 
         premise = result["example"]["premise"]
         hypothesis = result["example"]["hypothesis"]
-        majority_label = result["majority_label"]
-        idx = result["uid"]
 
         if "c" in result["label_counter"]:
             edited_dataset["score"]["c"] = result["label_counter"]["c"] / 100
