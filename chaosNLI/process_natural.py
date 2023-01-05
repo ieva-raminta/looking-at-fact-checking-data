@@ -29,10 +29,25 @@ for item in nat_claims_items:
             hypothesis = claim
             label = most_common_label
 
+            result["example"] = {}
+            result["example"]["premise"] = premise
+            result["example"]["hypothesis"] = hypothesis
+            result["label_counter"] = {}
+            if -1 in list_of_labels:
+                result["label_counter"]["c"] = (
+                    list_of_labels.count(-1) / len(list_of_labels)
+                ) * 100
+            if 1 in list_of_labels:
+                result["label_counter"]["e"] = (
+                    list_of_labels.count(1) / len(list_of_labels)
+                ) * 100
+            if 0 in list_of_labels:
+                result["label_counter"]["n"] = (
+                    list_of_labels.count(0) / len(list_of_labels)
+                ) * 100
 
             two_labels_exist = True if len(set(list_of_labels)) > 1 else False
             if two_labels_exist:
-    
 
                 result["subtrees_from_premise"] = find_subtrees(premise)
                 result["subtrees_from_hypothesis"] = find_subtrees(hypothesis)
@@ -52,8 +67,7 @@ for item in nat_claims_items:
                     hypothesis_cropped = hypothesis[:starts] + hypothesis[ends:]
                     result["cropped_hypotheses"].append(hypothesis_cropped)
 
-    new_results.append(result)
+            new_results.append(result)
 
 with open("parsed_natural_train.json", "w") as fout:
     json.dump(new_results, fout)
-
