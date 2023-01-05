@@ -157,7 +157,6 @@ for item in parsed_chaosnli_items:
                     edited_dataset["score"][predicted_label] = confidence
                     edited_dataset["edited_item"][predicted_label] = edited_item
 
-        pdb.set_trace()
         parsed_dataset.append(edited_dataset)
 
 
