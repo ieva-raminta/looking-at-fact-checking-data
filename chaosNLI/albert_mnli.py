@@ -173,8 +173,22 @@ for inputid, inputs in enumerate(tokenized_nat_dev):
     model.config.id2label[predicted_class_id]
     predicted_labels.append(mnli_labels_to_nat[predicted_class_id])
 
-f1 = f1_score(np.array(true_labels), np.array(predicted_labels))
-print(f1)
+pdb.set_trace()
+
+f1_none = f1_score(np.array(true_labels), np.array(predicted_labels), average=None)
+f1_micro = f1_score(np.array(true_labels), np.array(predicted_labels), average="micro")
+f1_macro = f1_score(np.array(true_labels), np.array(predicted_labels), average="macro")
+f1_weighted = f1_score(np.array(true_labels), np.array(predicted_labels), average="weighted")
+
+print("None")
+print(f1_none)
+print("micro")
+print(f1_micro)
+print("macro")
+print(f1_macro)
+print("weighted")
+print(f1_weighted)
+
 pdb.set_trace()
 
 
