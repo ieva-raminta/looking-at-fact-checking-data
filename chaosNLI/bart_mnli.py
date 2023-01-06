@@ -35,7 +35,7 @@ f = open("nat_claims_dev.jsonl")
 nat_claims_dev_items = list(f)
 
 nat_dataset = []
-for item in nat_claims_dev_items:
+for item in nat_claims_dev_items[:100]:
     result = json.loads(item)
     claim = result["claim"]
     sentence_annotations = [{r[-1]: r[0]} for r in result["annotations"].values()]
@@ -192,7 +192,6 @@ predicted_labels = []
 
 # pdb.set_trace()
 
-
 trainer = Trainer(
     model=model,
     args=training_args,
@@ -201,8 +200,8 @@ trainer = Trainer(
     compute_metrics=compute_metrics,
 )
 
-trainer.evaluate()
-
+evaluation = trainer.predict(tokenized_nat)
+print(evaluation.predictions.shape, evaluation.predictions.label_ids.shape, )
 
 # trainer.train()
 
