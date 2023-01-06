@@ -59,7 +59,6 @@ def load_natural_datasets(filename):
 nat_dev_dataset = load_natural_datasets("nat_claims_dev.jsonl")
 nat_train_dataset = load_natural_datasets("nat_claims_train.jsonl")
 
-pdb.set_trace()
 
 metric = evaluate.load("accuracy")
 training_args = TrainingArguments(
@@ -169,7 +168,6 @@ def tokenize_function(examples):
 tokenized_nat_dev = nat_dev_dataset.map(tokenize_function, batched=True)
 tokenized_nat_train = nat_train_dataset.map(tokenize_function, batched=True)
 
-pdb.set_trace()
 
 # true_dev_labels = [i["label"] for i in nat_dev_dataset]
 # predicted_dev_labels = []
@@ -207,6 +205,13 @@ pdb.set_trace()
 
 # train_dataset = pd.DataFrame.from_records()
 
+
+def compute_test_metrics(eval_pred):
+    logits, labels = eval_pred
+    predictions = np.argmax(logits[0], axis=-1)
+    return metric.compute(predictions=predictions, references=labels)
+
+
 trainer = Trainer(
     model=model,
     args=training_args,
@@ -216,5 +221,23 @@ trainer = Trainer(
 )
 
 trainer.train()
-
 trainer.save_model("trained_bart_on_nat_claims")
+
+test_args = TrainingArguments(
+    output_dir="output",
+    do_train=False,
+    do_predict=True,
+    per_device_eval_batch_size=8,
+    dataloader_drop_last=False,
+)
+
+
+trainer = Trainer(
+    model=model,
+    args=test_args,
+    eval_dataset=tokenized_nat_dev,
+    compute_metrics=compute_test_metrics,
+)
+
+evaluation = trainer.predict(tokenized_nat)
+print(evaluation)

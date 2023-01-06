@@ -35,7 +35,7 @@ f = open("nat_claims_dev.jsonl")
 nat_claims_dev_items = list(f)
 
 nat_dataset = []
-for item in nat_claims_dev_items:
+for item in nat_claims_dev_items[:10]:
     result = json.loads(item)
     claim = result["claim"]
     sentence_annotations = [{r[-1]: r[0]} for r in result["annotations"].values()]
@@ -69,7 +69,6 @@ def compute_metrics(eval_pred):
     logits, labels = eval_pred
     predictions = np.argmax(logits[0], axis=-1)
     return metric.compute(predictions=predictions, references=labels)
-
 
 
 tokenizer = AutoTokenizer.from_pretrained("facebook/bart-large-mnli")
@@ -192,11 +191,11 @@ predicted_labels = []
 
 
 test_args = TrainingArguments(
-    output_dir = "output",
-    do_train = False,
-    do_predict = True,
-    per_device_eval_batch_size = 8,
-    dataloader_drop_last = False
+    output_dir="output",
+    do_train=False,
+    do_predict=True,
+    per_device_eval_batch_size=8,
+    dataloader_drop_last=False,
 )
 
 trainer = Trainer(
@@ -209,7 +208,7 @@ trainer = Trainer(
 evaluation = trainer.predict(tokenized_nat)
 print(evaluation)
 
+
 # trainer.train()
 
 # trainer.save_model("test_trainer")
-
