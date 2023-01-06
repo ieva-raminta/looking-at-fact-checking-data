@@ -25,7 +25,7 @@ from datasets import (
 from sklearn.metrics import f1_score
 from collections import Counter
 from datasets import Dataset
-
+import random
 
 label_map = {-1: 0, 0: 1, 1: 2}
 
@@ -52,6 +52,7 @@ def load_natural_datasets(filename):
                 nat_dataset.append(
                     {"premise": premise, "hypothesis": hypothesis, "label": label}
                 )
+    random.shuffle(nat_dataset)
     nat_Dataset = Dataset.from_list(nat_dataset)
     return nat_Dataset
 
@@ -64,8 +65,8 @@ metric = evaluate.load("accuracy")
 training_args = TrainingArguments(
     output_dir="trained_bart_on_nat_claims_dir",
     evaluation_strategy="epoch",
-    num_train_epochs=5,
-    per_device_train_batch_size=32,
+    num_train_epochs=20,
+    per_device_train_batch_size=8,
 )
 
 # LABEL_MAP = {"entailment": 0, "neutral": 1, "contradiction": 2, "hidden": 0}
@@ -205,11 +206,11 @@ tokenized_nat_train = nat_train_dataset.map(tokenize_function, batched=True)
 
 # train_dataset = pd.DataFrame.from_records()
 
-
 def compute_test_metrics(eval_pred):
     logits, labels = eval_pred
     predictions = np.argmax(logits[0], axis=-1)
     return metric.compute(predictions=predictions, references=labels)
+
 
 
 trainer = Trainer(
@@ -224,12 +225,13 @@ trainer.train()
 trainer.save_model("trained_bart_on_nat_claims")
 
 test_args = TrainingArguments(
-    output_dir="output",
-    do_train=False,
-    do_predict=True,
-    per_device_eval_batch_size=8,
-    dataloader_drop_last=False,
+    output_dir = "output",
+    do_train = False,
+    do_predict = True,
+    per_device_eval_batch_size = 8,
+    dataloader_drop_last = False
 )
+
 
 
 trainer = Trainer(
@@ -241,3 +243,6 @@ trainer = Trainer(
 
 evaluation = trainer.predict(tokenized_nat)
 print(evaluation)
+
+
+
