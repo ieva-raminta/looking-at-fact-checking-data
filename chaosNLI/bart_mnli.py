@@ -35,7 +35,7 @@ f = open("nat_claims_dev.jsonl")
 nat_claims_dev_items = list(f)
 
 nat_dataset = []
-for item in nat_claims_dev_items[:100]:
+for item in nat_claims_dev_items:
     result = json.loads(item)
     claim = result["claim"]
     sentence_annotations = [{r[-1]: r[0]} for r in result["annotations"].values()]
@@ -67,8 +67,9 @@ training_args = TrainingArguments(
 
 def compute_metrics(eval_pred):
     logits, labels = eval_pred
-    predictions = np.argmax(logits, axis=-1)
+    predictions = np.argmax(logits[0], axis=-1)
     return metric.compute(predictions=predictions, references=labels)
+
 
 
 tokenizer = AutoTokenizer.from_pretrained("facebook/bart-large-mnli")
@@ -172,7 +173,6 @@ predicted_labels = []
 # model.config.id2label[predicted_class_id]
 # predicted_labels.append(mnli_labels_to_nat[predicted_class_id])
 
-# pdb.set_trace()
 #
 # f1_none = f1_score(np.array(true_labels), np.array(predicted_labels), average=None)
 # f1_micro = f1_score(np.array(true_labels), np.array(predicted_labels), average="micro")
@@ -190,21 +190,26 @@ predicted_labels = []
 # print("weighted")
 # print(f1_weighted)
 
-# pdb.set_trace()
+
+test_args = TrainingArguments(
+    output_dir = "output",
+    do_train = False,
+    do_predict = True,
+    per_device_eval_batch_size = 8,
+    dataloader_drop_last = False
+)
 
 trainer = Trainer(
     model=model,
-    args=training_args,
-    train_dataset=tokenized_nat,
+    args=test_args,
     eval_dataset=tokenized_nat,
     compute_metrics=compute_metrics,
 )
 
 evaluation = trainer.predict(tokenized_nat)
-print(evaluation.predictions.shape, evaluation.predictions.label_ids.shape, )
+print(evaluation)
 
 # trainer.train()
 
 # trainer.save_model("test_trainer")
 
-# pdb.set_trace()
