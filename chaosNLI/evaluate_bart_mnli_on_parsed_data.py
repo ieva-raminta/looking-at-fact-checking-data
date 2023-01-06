@@ -29,7 +29,7 @@ output_file = (
 # output_file = "parsed_chaosnli_evaluated_with_bart_trained_on_mnli_no_majority.json"
 
 f = open(input_file)
-parsed_chaosnli_items = list(f)
+parsed_items = list(f)
 
 
 tokenizer = AutoTokenizer.from_pretrained("facebook/bart-large-mnli")
@@ -46,9 +46,10 @@ else:
 
 mnli_labels_to_nli = {0: "c", 1: "n", 2: "e"}
 
-
+counter = 0
 parsed_dataset = []
-for item in parsed_chaosnli_items:
+for item in parsed_items:
+    counter += 1
     results = json.loads(item)
 
     for result in results:
@@ -164,7 +165,7 @@ for item in parsed_chaosnli_items:
                     edited_dataset["edited_item"][predicted_label] = edited_item
 
         parsed_dataset.append(edited_dataset)
-
+    print(counter, len(parsed_items))
 
 with open(output_file, "w") as outfile:
     json.dump(parsed_dataset, outfile)
