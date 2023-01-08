@@ -66,7 +66,7 @@ training_args = TrainingArguments(
     output_dir="trained_bart_on_nat_claims_dir",
     evaluation_strategy="epoch",
     num_train_epochs=20,
-    per_device_train_batch_size=8,
+    per_device_train_batch_size=4,
 )
 
 # LABEL_MAP = {"entailment": 0, "neutral": 1, "contradiction": 2, "hidden": 0}
@@ -228,7 +228,7 @@ test_args = TrainingArguments(
     output_dir = "output",
     do_train = False,
     do_predict = True,
-    per_device_eval_batch_size = 8,
+    per_device_eval_batch_size = 1,
     dataloader_drop_last = False
 )
 

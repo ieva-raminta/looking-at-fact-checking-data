@@ -195,7 +195,7 @@ test_args = TrainingArguments(
     output_dir = "output",
     do_train = False,
     do_predict = True,
-    per_device_eval_batch_size = 8,
+    per_device_eval_batch_size = 1,
     dataloader_drop_last = False
 )
 
