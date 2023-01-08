@@ -31,11 +31,11 @@ mnli_labels_to_nat = {0: -1, 1: 0, 2: 1}
 nat_labels_to_mnli = {-1: 0, 0: 1, 1: 2}
 
 
-f = open("nat_claims_dev.jsonl")
+f = open("rds/hpc-work/nat_claims_dev.jsonl")
 nat_claims_dev_items = list(f)
 
 nat_dataset = []
-for item in nat_claims_dev_items[:10]:
+for item in nat_claims_dev_items:
     result = json.loads(item)
     claim = result["claim"]
     sentence_annotations = [{r[-1]: r[0]} for r in result["annotations"].values()]

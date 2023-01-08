@@ -20,13 +20,13 @@ from datasets import (
 from sklearn.metrics import f1_score
 from collections import Counter
 
-input_file = "parsed_natural_train.json"
+input_file = "rds/hpc-work/parsed_natural_train.json"
 output_file = (
-    "parsed_natural_train_evaluated_with_bart_trained_on_mnli_no_majority.json"
+    "rds/hpc-work/parsed_natural_train_evaluated_with_bart_trained_on_mnli_no_majority.json"
 )
 
-# input_file = "parsed_chaosnli.json"
-# output_file = "parsed_chaosnli_evaluated_with_bart_trained_on_mnli_no_majority.json"
+# input_file = "rds/hpc-work/parsed_chaosnli.json"
+# output_file = "rds/hpc-work/parsed_chaosnli_evaluated_with_bart_trained_on_mnli_no_majority.json"
 
 f = open(input_file)
 parsed_items = list(f)

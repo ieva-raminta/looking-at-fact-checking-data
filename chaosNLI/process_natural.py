@@ -12,7 +12,7 @@ multiple_evidence = 0
 new_results = []
 
 
-f = open("nat_claims_train.jsonl")
+f = open("rds/hpc-work/nat_claims_train.jsonl")
 nat_claims_items = list(f)
 nat_dataset = []
 for item in nat_claims_items:
@@ -69,5 +69,5 @@ for item in nat_claims_items:
 
             new_results.append(result)
 
-with open("parsed_natural_train.json", "w") as fout:
+with open("rds/hpc-work/parsed_natural_train.json", "w") as fout:
     json.dump(new_results, fout)

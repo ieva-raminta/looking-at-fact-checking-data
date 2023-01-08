@@ -19,7 +19,7 @@ def intersection(lst1, lst2):
     return lst3
 
 
-f = open("nat_claims_train.jsonl")
+f = open("rds/hpc-work/nat_claims_train.jsonl")
 _items = list(f)
 
 conflicting_evidence_items = []

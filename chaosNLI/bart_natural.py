@@ -57,8 +57,8 @@ def load_natural_datasets(filename):
     return nat_Dataset
 
 
-nat_dev_dataset = load_natural_datasets("nat_claims_dev.jsonl")
-nat_train_dataset = load_natural_datasets("nat_claims_train.jsonl")
+nat_dev_dataset = load_natural_datasets("rds/hpc-work/nat_claims_dev.jsonl")
+nat_train_dataset = load_natural_datasets("rds/hpc-work/nat_claims_train.jsonl")
 
 
 metric = evaluate.load("accuracy")

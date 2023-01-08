@@ -7,7 +7,7 @@ from parsing_for_focal_points import find_subtrees
 print(os.getcwd())
 
 
-f = open("chaosNLI_v1.0/chaosNLI_mnli_m.jsonl")
+f = open("rds/hpc-work/chaosNLI_v1.0/chaosNLI_mnli_m.jsonl")
 _items = list(f)
 
 conflicting_evidence_items = []
@@ -56,7 +56,7 @@ for item in _items:
 
     new_results.append(result)
 
-with open("parsed_chaosnli.json", "w") as fout:
+with open("rds/hpc-work/parsed_chaosnli.json", "w") as fout:
     json.dump(new_results, fout)
 
 print(multiple_evidence / len(_items))
