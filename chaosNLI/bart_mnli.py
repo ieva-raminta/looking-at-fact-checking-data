@@ -71,6 +71,7 @@ def compute_metrics(eval_pred):
     return metric.compute(predictions=predictions, references=labels)
 
 
+
 tokenizer = AutoTokenizer.from_pretrained("facebook/bart-large-mnli")
 model = AutoModelForSequenceClassification.from_pretrained("facebook/bart-large-mnli")
 
@@ -191,11 +192,11 @@ predicted_labels = []
 
 
 test_args = TrainingArguments(
-    output_dir="output",
-    do_train=False,
-    do_predict=True,
-    per_device_eval_batch_size=8,
-    dataloader_drop_last=False,
+    output_dir = "output",
+    do_train = False,
+    do_predict = True,
+    per_device_eval_batch_size = 8,
+    dataloader_drop_last = False
 )
 
 trainer = Trainer(
@@ -212,3 +213,4 @@ print(evaluation)
 # trainer.train()
 
 # trainer.save_model("test_trainer")
+
