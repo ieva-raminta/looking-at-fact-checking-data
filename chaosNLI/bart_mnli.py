@@ -66,7 +66,8 @@ training_args = TrainingArguments(
 
 
 def compute_metrics(eval_pred):
-    logits, labels = eval_pred
+    with torch.no_grad(): 
+        logits, labels = eval_pred
     predictions = np.argmax(logits[0], axis=-1)
     return metric.compute(predictions=predictions, references=labels)
 

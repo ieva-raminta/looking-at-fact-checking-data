@@ -207,7 +207,8 @@ tokenized_nat_train = nat_train_dataset.map(tokenize_function, batched=True)
 # train_dataset = pd.DataFrame.from_records()
 
 def compute_test_metrics(eval_pred):
-    logits, labels = eval_pred
+    with torch.no_grad():
+        logits, labels = eval_pred
     predictions = np.argmax(logits[0], axis=-1)
     return metric.compute(predictions=predictions, references=labels)
 
