@@ -69,5 +69,5 @@ for item in nat_claims_items:
 
             new_results.append(result)
 
-with open("rds/hpc-work/parsed_natural_train.json", "w") as fout:
+with open("rds/hpc-work/parsed_natural_train.jsonl", "w") as fout:
     json.dump(new_results, fout)

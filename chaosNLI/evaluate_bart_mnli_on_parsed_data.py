@@ -21,9 +21,7 @@ from sklearn.metrics import f1_score
 from collections import Counter
 
 input_file = "rds/hpc-work/parsed_natural_train.json"
-output_file = (
-    "rds/hpc-work/parsed_natural_train_evaluated_with_bart_trained_on_mnli_no_majority.json"
-)
+output_file = "rds/hpc-work/parsed_natural_train_evaluated_with_bart_trained_on_mnli_no_majority.json"
 
 # input_file = "rds/hpc-work/parsed_chaosnli.json"
 # output_file = "rds/hpc-work/parsed_chaosnli_evaluated_with_bart_trained_on_mnli_no_majority.json"
@@ -48,123 +46,120 @@ mnli_labels_to_nli = {0: "c", 1: "n", 2: "e"}
 
 counter = 0
 parsed_dataset = []
-for item in parsed_items:
+for result in parsed_items:
+
     counter += 1
-    results = json.loads(item)
+    edited_dataset = {}
+    edited_dataset["score"] = {}
+    edited_item = None
+    edited_dataset["edited_item"] = {}
 
-    for result in results:
+    premise = result["example"]["premise"]
+    hypothesis = result["example"]["hypothesis"]
 
-        edited_dataset = {}
-        edited_dataset["score"] = {}
-        edited_item = None
-        edited_dataset["edited_item"] = {}
+    if "c" in result["label_counter"]:
+        edited_dataset["score"]["c"] = result["label_counter"]["c"] / 100
+        edited_dataset["edited_item"]["c"] = (
+            premise,
+            hypothesis,
+            "c",
+            None,
+            "",
+            "original",
+        )
+    if "e" in result["label_counter"]:
+        edited_dataset["score"]["e"] = result["label_counter"]["e"] / 100
+        edited_dataset["edited_item"]["e"] = (
+            premise,
+            hypothesis,
+            "e",
+            None,
+            "",
+            "original",
+        )
+    if "n" in result["label_counter"]:
+        edited_dataset["score"]["n"] = result["label_counter"]["n"] / 100
+        edited_dataset["edited_item"]["n"] = (
+            premise,
+            hypothesis,
+            "n",
+            None,
+            "",
+            "original",
+        )
 
-        premise = result["example"]["premise"]
-        hypothesis = result["example"]["hypothesis"]
+    if "subtrees_from_premise" in result.keys():
+        subtrees_from_premise = result["subtrees_from_premise"]
+        subtrees_from_hypothesis = result["subtrees_from_hypothesis"]
 
-        if "c" in result["label_counter"]:
-            edited_dataset["score"]["c"] = result["label_counter"]["c"] / 100
-            edited_dataset["edited_item"]["c"] = (
-                premise,
-                hypothesis,
-                "c",
-                None,
-                "",
-                "original",
+        cropped_premises = result["cropped_premises"]
+        cropped_hypotheses = result["cropped_hypotheses"]
+
+        for cropped_id, cropped_premise in enumerate(cropped_premises):
+            tokenized_premhyp = tokenizer(
+                cropped_premise, hypothesis, return_tensors="pt"
             )
-        if "e" in result["label_counter"]:
-            edited_dataset["score"]["e"] = result["label_counter"]["e"] / 100
-            edited_dataset["edited_item"]["e"] = (
-                premise,
-                hypothesis,
-                "e",
-                None,
-                "",
-                "original",
-            )
-        if "n" in result["label_counter"]:
-            edited_dataset["score"]["n"] = result["label_counter"]["n"] / 100
-            edited_dataset["edited_item"]["n"] = (
-                premise,
-                hypothesis,
-                "n",
-                None,
-                "",
-                "original",
-            )
-
-        if "subtrees_from_premise" in result.keys():
-            subtrees_from_premise = result["subtrees_from_premise"]
-            subtrees_from_hypothesis = result["subtrees_from_hypothesis"]
-
-            cropped_premises = result["cropped_premises"]
-            cropped_hypotheses = result["cropped_hypotheses"]
-
-            for cropped_id, cropped_premise in enumerate(cropped_premises):
-                tokenized_premhyp = tokenizer(
-                    cropped_premise, hypothesis, return_tensors="pt"
+            with torch.no_grad():
+                logits = model(**tokenized_premhyp).logits
+            confidence = logits.softmax(-1).max().item()
+            predicted_class_id = logits.argmax().item()
+            predicted_label = mnli_labels_to_nli[predicted_class_id]
+            if (
+                predicted_label in edited_dataset["score"]
+                and confidence > edited_dataset["score"][predicted_label]
+            ):
+                edit = premise[
+                    subtrees_from_premise[cropped_id][0] : subtrees_from_premise[
+                        cropped_id
+                    ][1]
+                ]
+                edited_item = (
+                    cropped_premise,
+                    hypothesis,
+                    predicted_label,
+                    (
+                        subtrees_from_premise[cropped_id][0],
+                        subtrees_from_premise[cropped_id][1],
+                    ),
+                    edit,
+                    "cropped premise",
                 )
-                with torch.no_grad():
-                    logits = model(**tokenized_premhyp).logits
-                confidence = logits.softmax(-1).max().item()
-                predicted_class_id = logits.argmax().item()
-                predicted_label = mnli_labels_to_nli[predicted_class_id]
-                if (
-                    predicted_label in edited_dataset["score"]
-                    and confidence > edited_dataset["score"][predicted_label]
-                ):
-                    edit = premise[
-                        subtrees_from_premise[cropped_id][0] : subtrees_from_premise[
-                            cropped_id
-                        ][1]
-                    ]
-                    edited_item = (
-                        cropped_premise,
-                        hypothesis,
-                        predicted_label,
-                        (
-                            subtrees_from_premise[cropped_id][0],
-                            subtrees_from_premise[cropped_id][1],
-                        ),
-                        edit,
-                        "cropped premise",
-                    )
-                    edited_dataset["score"][predicted_label] = confidence
-                    edited_dataset["edited_item"][predicted_label] = edited_item
+                edited_dataset["score"][predicted_label] = confidence
+                edited_dataset["edited_item"][predicted_label] = edited_item
 
-            for cropped_id, cropped_hypothesis in enumerate(cropped_hypotheses):
-                tokenized_premhyp = tokenizer(
-                    premise, cropped_hypothesis, return_tensors="pt"
+        for cropped_id, cropped_hypothesis in enumerate(cropped_hypotheses):
+            tokenized_premhyp = tokenizer(
+                premise, cropped_hypothesis, return_tensors="pt"
+            )
+            with torch.no_grad():
+                logits = model(**tokenized_premhyp).logits
+            confidence = logits.softmax(-1).max().item()
+            predicted_class_id = logits.argmax().item()
+            predicted_label = mnli_labels_to_nli[predicted_class_id]
+            if (
+                predicted_label in edited_dataset["score"]
+                and confidence > edited_dataset["score"][predicted_label]
+            ):
+                edit = hypothesis[
+                    subtrees_from_hypothesis[cropped_id][0] : subtrees_from_hypothesis[
+                        cropped_id
+                    ][1]
+                ]
+                edited_item = (
+                    premise,
+                    cropped_hypothesis,
+                    predicted_label,
+                    (
+                        subtrees_from_hypothesis[cropped_id][0],
+                        subtrees_from_hypothesis[cropped_id][1],
+                    ),
+                    edit,
+                    "cropped_hypothesis",
                 )
-                with torch.no_grad():
-                    logits = model(**tokenized_premhyp).logits
-                confidence = logits.softmax(-1).max().item()
-                predicted_class_id = logits.argmax().item()
-                predicted_label = mnli_labels_to_nli[predicted_class_id]
-                if (
-                    predicted_label in edited_dataset["score"]
-                    and confidence > edited_dataset["score"][predicted_label]
-                ):
-                    edit = hypothesis[
-                        subtrees_from_hypothesis[cropped_id][
-                            0
-                        ] : subtrees_from_hypothesis[cropped_id][1]
-                    ]
-                    edited_item = (
-                        premise,
-                        cropped_hypothesis,
-                        predicted_label,
-                        (
-                            subtrees_from_hypothesis[cropped_id][0],
-                            subtrees_from_hypothesis[cropped_id][1],
-                        ),
-                        edit,
-                        "cropped_hypothesis",
-                    )
-                    edited_dataset["score"][predicted_label] = confidence
-                    edited_dataset["edited_item"][predicted_label] = edited_item
+                edited_dataset["score"][predicted_label] = confidence
+                edited_dataset["edited_item"][predicted_label] = edited_item
 
-        parsed_dataset.append(edited_dataset)
+    parsed_dataset.append(edited_dataset)
     print(counter, len(parsed_items))
 
 with open(output_file, "w") as outfile:
