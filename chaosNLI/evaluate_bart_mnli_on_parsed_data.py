@@ -20,15 +20,14 @@ from datasets import (
 from sklearn.metrics import f1_score
 from collections import Counter
 
-input_file = "rds/hpc-work/parsed_natural_train.json"
-output_file = "rds/hpc-work/parsed_natural_train_evaluated_with_bart_trained_on_mnli_no_majority.json"
+input_file = "rds/hpc-work/parsed_natural_train.jsonl"
+output_file = "rds/hpc-work/parsed_natural_train_evaluated_with_bart_trained_on_mnli_no_majority.jsonl"
 
 # input_file = "rds/hpc-work/parsed_chaosnli.json"
 # output_file = "rds/hpc-work/parsed_chaosnli_evaluated_with_bart_trained_on_mnli_no_majority.json"
 
-f = open(input_file)
-parsed_items = list(f)
-
+with open(input_file, "r") as read_file: 
+    parsed_items = json.load(read_file) 
 
 tokenizer = AutoTokenizer.from_pretrained("facebook/bart-large-mnli")
 model = AutoModelForSequenceClassification.from_pretrained("facebook/bart-large-mnli")
@@ -53,7 +52,7 @@ for result in parsed_items:
     edited_dataset["score"] = {}
     edited_item = None
     edited_dataset["edited_item"] = {}
-
+    
     premise = result["example"]["premise"]
     hypothesis = result["example"]["hypothesis"]
 
@@ -122,7 +121,7 @@ for result in parsed_items:
                         subtrees_from_premise[cropped_id][1],
                     ),
                     edit,
-                    "cropped premise",
+                    "cropped_premise",
                 )
                 edited_dataset["score"][predicted_label] = confidence
                 edited_dataset["edited_item"][predicted_label] = edited_item
@@ -161,6 +160,7 @@ for result in parsed_items:
 
     parsed_dataset.append(edited_dataset)
     print(counter, len(parsed_items))
+
 
 with open(output_file, "w") as outfile:
     json.dump(parsed_dataset, outfile)

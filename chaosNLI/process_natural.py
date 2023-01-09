@@ -48,7 +48,6 @@ for item in nat_claims_items:
 
             two_labels_exist = True if len(set(list_of_labels)) > 1 else False
             if two_labels_exist:
-
                 result["subtrees_from_premise"] = find_subtrees(premise)
                 result["subtrees_from_hypothesis"] = find_subtrees(hypothesis)
 
@@ -67,7 +66,8 @@ for item in nat_claims_items:
                     hypothesis_cropped = hypothesis[:starts] + hypothesis[ends:]
                     result["cropped_hypotheses"].append(hypothesis_cropped)
 
-            new_results.append(result)
+            if result not in new_results: 
+                new_results.append(result)
 
 with open("rds/hpc-work/parsed_natural_train.jsonl", "w") as fout:
     json.dump(new_results, fout)
