@@ -63,7 +63,7 @@ nat_train_dataset = load_natural_datasets("rds/hpc-work/nat_claims_train.jsonl")
 
 metric = evaluate.load("accuracy")
 training_args = TrainingArguments(
-    output_dir="trained_bart_on_nat_claims_dir",
+    output_dir="rds/hpc-work/trained_bart_on_nat_claims_dir",
     evaluation_strategy="epoch",
     num_train_epochs=20,
     per_device_train_batch_size=4,
