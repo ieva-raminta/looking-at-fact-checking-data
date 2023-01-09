@@ -29,6 +29,8 @@ import random
 
 label_map = {-1: 0, 0: 1, 1: 2}
 
+OUTPUT_DIR = "output_bart_natural"
+
 
 def load_natural_datasets(filename):
     f = open(filename)
@@ -69,8 +71,6 @@ training_args = TrainingArguments(
     per_device_train_batch_size=4,
 )
 
-# LABEL_MAP = {"entailment": 0, "neutral": 1, "contradiction": 2, "hidden": 0}
-
 
 def compute_metrics(eval_pred):
     logits, labels = eval_pred
@@ -90,121 +90,15 @@ else:
     print("No GPU available, using the CPU instead.")
     device = torch.device("cpu")
 
-# loaded_mnli = load_dataset("multi_nli")
-# loaded_fever = load_dataset("fever", "v1.0")
-# loaded_wiki_pages = load_dataset("fever", "wiki_pages")
-# loaded_fever.rename_column("claim", "hypothesis")
-
-
-# def include_wiki_evidence(example):
-#    try:
-#        page_index = loaded_wiki_pages["wikipedia_pages"]["id"].index(
-#            example["evidence_wiki_url"]
-#        )
-#    except:
-#        page_index = False
-#    if page_index:
-#        page_lines = loaded_wiki_pages["wikipedia_pages"]["lines"][
-#            page_index
-#        ].splitlines()
-#        if len(page_lines) == 0:
-#            example["premise"] = ""
-#        elif example["evidence_sentence_id"] < len(page_lines):
-#            example["premise"] = page_lines[example["evidence_sentence_id"]]
-#        else:
-#            example["premise"] = page_lines[-1]
-#    else:
-#        example["premise"] = ""
-#
-#    return example
-
-
-# def map_labels(example):
-#    the_map = {"NOT ENOUGH INFO": 1, "SUPPORTS": 0, "REFUTES": 2}
-#    if example["label"] not in the_map.keys():
-#        example["label"] = 1
-#    else:
-#        example["label"] = the_map[example["label"]]
-#    return example
-
-
-# loaded_fever = loaded_fever.map(map_labels)
-# loaded_fever_with_wiki = loaded_fever.map(include_wiki_evidence)
-
-# loaded_fever_with_wiki.save_to_disk("fever_with_wiki")
-
-# loaded_fever_with_wiki = loaded_fever_with_wiki.remove_columns(
-#    [
-#        "id",
-#        "evidence_annotation_id",
-#        "evidence_id",
-#        "evidence_wiki_url",
-#        "evidence_sentence_id",
-#    ]
-# )
-# loaded_mnli = loaded_mnli.remove_columns(
-#    [
-#        "promptID",
-#        "pairID",
-#        "premise_binary_parse",
-#        "premise_parse",
-#        "hypothesis_binary_parse",
-#        "hypothesis_parse",
-#        "genre",
-#    ]
-# )
-
-# assert loaded_mnli.features.type == loaded_fever_with_wiki.features.type
-# nli_dataset = concatenate_datasets([loaded_mnli, loaded_fever_with_wiki])
 
 
 def tokenize_function(examples):
     return tokenizer(examples["premise"], examples["hypothesis"], padding="max_length")
 
 
-# tokenized_mnli = loaded_mnli.map(tokenize_function, batched=True)
-# train_dataset = tokenized_mnli["train"].shuffle(seed=42)
-# eval_dataset = tokenized_mnli["validation_matched"].shuffle(seed=42)
-
 tokenized_nat_dev = nat_dev_dataset.map(tokenize_function, batched=True)
 tokenized_nat_train = nat_train_dataset.map(tokenize_function, batched=True)
 
-
-# true_dev_labels = [i["label"] for i in nat_dev_dataset]
-# predicted_dev_labels = []
-
-# true_train_labels = [i["label"] for i in nat_train_dataset]
-# predicted_train_labels = []
-
-# mnli_labels_to_nat = {0: -1, 1: 0, 2: 1}
-
-# for inputid, inputs in enumerate(tokenized_nat_dev):
-#    with torch.no_grad():
-#        logits = model(**inputs).logits
-#
-#    predicted_class_id = logits.argmax().item()
-#    model.config.id2label[predicted_class_id]
-#    predicted_labels.append(mnli_labels_to_nat[predicted_class_id])
-
-
-# f1_none_dev = f1_score(np.array(true_dev_labels), np.array(predicted_dev_labels), average=None)
-# f1_micro_dev = f1_score(np.array(true_dev_labels), np.array(predicted_dev_labels), average="micro")
-# f1_macro_dev = f1_score(np.array(true_dev_labels), np.array(predicted_dev_labels), average="macro")
-# f1_weighted_dev = f1_score(
-#    np.array(true_dev_labels), np.array(predicted_dev_labels), average="weighted"
-# )
-
-# print("None")
-# print(f1_none_dev)
-# print("micro")
-# print(f1_micro_dev)
-# print("macro")
-# print(f1_macro_dev)
-# print("weighted")
-# print(f1_weighted_dev)
-
-
-# train_dataset = pd.DataFrame.from_records()
 
 def compute_test_metrics(eval_pred):
     with torch.no_grad():
@@ -226,11 +120,12 @@ trainer.train()
 trainer.save_model("trained_bart_on_nat_claims")
 
 test_args = TrainingArguments(
-    output_dir = "output",
+    output_dir = OUTPUT_DIR,
     do_train = False,
     do_predict = True,
     per_device_eval_batch_size = 1,
-    dataloader_drop_last = False
+    dataloader_drop_last = False,
+    eval_accumulation_steps=1,
 )
 
 
