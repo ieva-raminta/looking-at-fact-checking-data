@@ -26,8 +26,8 @@ output_file = "rds/hpc-work/parsed_natural_train_evaluated_with_bart_trained_on_
 # input_file = "rds/hpc-work/parsed_chaosnli.json"
 # output_file = "rds/hpc-work/parsed_chaosnli_evaluated_with_bart_trained_on_mnli_no_majority.json"
 
-with open(input_file, "r") as read_file: 
-    parsed_items = json.load(read_file) 
+with open(input_file, "r") as read_file:
+    parsed_items = json.load(read_file)
 
 tokenizer = AutoTokenizer.from_pretrained("facebook/bart-large-mnli")
 model = AutoModelForSequenceClassification.from_pretrained("facebook/bart-large-mnli")
@@ -50,15 +50,19 @@ for result in parsed_items:
     counter += 1
     edited_dataset = {}
     edited_dataset["score"] = {}
+    edited_dataset["original_score"] = {}
     edited_item = None
     edited_dataset["edited_item"] = {}
-    
+    edited_dataset["original_item"] = {}
+
     premise = result["example"]["premise"]
     hypothesis = result["example"]["hypothesis"]
 
     if "c" in result["label_counter"]:
-        edited_dataset["score"]["c"] = result["label_counter"]["c"] / 100
-        edited_dataset["edited_item"]["c"] = (
+        og_score = result["label_counter"]["c"] / 100
+        edited_dataset["original_score"]["c"] = og_score
+        edited_dataset["score"]["c"] = og_score
+        og_item = (
             premise,
             hypothesis,
             "c",
@@ -66,9 +70,13 @@ for result in parsed_items:
             "",
             "original",
         )
+        edited_dataset["edited_item"]["c"] = og_item
+        edited_dataset["original_item"]["c"] = og_item
     if "e" in result["label_counter"]:
-        edited_dataset["score"]["e"] = result["label_counter"]["e"] / 100
-        edited_dataset["edited_item"]["e"] = (
+        og_score = result["label_counter"]["e"] / 100
+        edited_dataset["original_score"]["e"] = og_score
+        edited_dataset["score"]["e"] = og_score
+        og_item = (
             premise,
             hypothesis,
             "e",
@@ -76,9 +84,14 @@ for result in parsed_items:
             "",
             "original",
         )
+        edited_dataset["edited_item"]["e"] = og_item
+        edited_dataset["original_item"]["e"] = og_item
+
     if "n" in result["label_counter"]:
-        edited_dataset["score"]["n"] = result["label_counter"]["n"] / 100
-        edited_dataset["edited_item"]["n"] = (
+        og_score = result["label_counter"]["n"] / 100
+        edited_dataset["original_score"]["n"] = og_score
+        edited_dataset["score"]["n"] = og_score
+        og_item = (
             premise,
             hypothesis,
             "n",
@@ -86,6 +99,8 @@ for result in parsed_items:
             "",
             "original",
         )
+        edited_dataset["edited_item"]["n"] = og_item
+        edited_dataset["original_item"]["n"] = og_item
 
     if "subtrees_from_premise" in result.keys():
         subtrees_from_premise = result["subtrees_from_premise"]
