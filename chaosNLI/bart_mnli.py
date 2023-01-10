@@ -25,12 +25,15 @@ from datasets import (
 from sklearn.metrics import f1_score
 from collections import Counter
 from datasets import Dataset
-
+from datetime import date
 
 #mnli_labels_to_nat = {0: -1, 1: 0, 2: 1}
 nat_labels_to_mnli = {-1: 0, 0: 1, 1: 2}
 
-OUTPUT_DIR = "output_bart_mnli"
+OUTPUT_DIR = "rds/hpc-work/output_bart_mnli"
+
+if os.path.exists(OUTPUT_DIR): 
+    OUTPUT_DIR += str(date.today())
 
 f = open("rds/hpc-work/nat_claims_dev.jsonl")
 nat_claims_dev_items = list(f)

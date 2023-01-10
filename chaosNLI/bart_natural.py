@@ -29,8 +29,14 @@ import random
 
 label_map = {-1: 0, 0: 1, 1: 2}
 
-OUTPUT_DIR = "output_bart_natural"
+TEST_OUTPUT_DIR = "rds/hpc-work/output_bart_natural_test"
+TRAIN_OUTPUT_DIR = "rds/hpc-work/output_bart_natural_train"
 
+if os.path.exists(TRAIN_OUTPUT_DIR):
+    TRAIN_OUTPUT_DIR += str(date.today())
+
+if os.path.exists(TEST_OUTPUT_DIR):
+    TEST_OUTPUT_DIR += str(date.today())
 
 def load_natural_datasets(filename):
     f = open(filename)
@@ -65,7 +71,7 @@ nat_train_dataset = load_natural_datasets("rds/hpc-work/nat_claims_train.jsonl")
 
 metric = evaluate.load("accuracy")
 training_args = TrainingArguments(
-    output_dir="rds/hpc-work/trained_bart_on_nat_claims_dir",
+    output_dir=TRAIN_OUTPUT_DIR,
     evaluation_strategy="epoch",
     num_train_epochs=20,
     per_device_train_batch_size=4,
@@ -120,7 +126,7 @@ trainer.train()
 trainer.save_model("trained_bart_on_nat_claims")
 
 test_args = TrainingArguments(
-    output_dir = OUTPUT_DIR,
+    output_dir = TEST_OUTPUT_DIR,
     do_train = False,
     do_predict = True,
     per_device_eval_batch_size = 1,
