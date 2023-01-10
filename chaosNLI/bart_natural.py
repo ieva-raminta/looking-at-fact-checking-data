@@ -27,14 +27,16 @@ from collections import Counter
 from datasets import Dataset
 import random
 from tkinter import Tcl
+from datetime import date
 
 label_map = {-1: 0, 0: 1, 1: 2}
 
 TEST_OUTPUT_DIR = "rds/hpc-work/output_bart_natural_test"
-TRAIN_OUTPUT_DIR = "rds/hpc-work/trained_bart_on_nat_claims" 
+TRAIN_OUTPUT_DIR = "rds/hpc-work/output_bart_natural_train"
 
 if os.path.exists(TEST_OUTPUT_DIR):
     TEST_OUTPUT_DIR += str(date.today())
+
 
 def load_natural_datasets(filename):
     f = open(filename)
@@ -84,12 +86,16 @@ def compute_metrics(eval_pred):
 
 tokenizer = AutoTokenizer.from_pretrained("facebook/bart-large-mnli")
 if os.path.exists(TRAIN_OUTPUT_DIR):
-    file_list = os.listdir(TRAIN_OUTPUT_DIR) 
+    file_list = os.listdir(TRAIN_OUTPUT_DIR)
     sorted_file_list = Tcl().call("lsort", "-dict", file_list)
     latest_checkpoint = sorted_file_list[-1]
-    model = AutoModelForSequenceClassification.from_pretrained(TRAIN_OUTPUT_DIR+"/"+latest_checkpoint)
-else: 
-    model = AutoModelForSequenceClassification.from_pretrained("facebook/bart-large-mnli")
+    model = AutoModelForSequenceClassification.from_pretrained(
+        TRAIN_OUTPUT_DIR + "/" + latest_checkpoint
+    )
+else:
+    model = AutoModelForSequenceClassification.from_pretrained(
+        "facebook/bart-large-mnli"
+    )
 
 if torch.cuda.is_available():
     device = torch.device("cuda")
@@ -99,7 +105,6 @@ if torch.cuda.is_available():
 else:
     print("No GPU available, using the CPU instead.")
     device = torch.device("cpu")
-
 
 
 def tokenize_function(examples):
@@ -117,7 +122,6 @@ def compute_test_metrics(eval_pred):
     return metric.compute(predictions=predictions, references=labels)
 
 
-
 trainer = Trainer(
     model=model,
     args=training_args,
@@ -130,14 +134,13 @@ trainer.train()
 trainer.save_model(TRAIN_OUTPUT_DIR)
 
 test_args = TrainingArguments(
-    output_dir = TEST_OUTPUT_DIR,
-    do_train = False,
-    do_predict = True,
-    per_device_eval_batch_size = 1,
-    dataloader_drop_last = False,
+    output_dir=TEST_OUTPUT_DIR,
+    do_train=False,
+    do_predict=True,
+    per_device_eval_batch_size=1,
+    dataloader_drop_last=False,
     eval_accumulation_steps=1,
 )
-
 
 
 trainer = Trainer(
@@ -149,6 +152,3 @@ trainer = Trainer(
 
 evaluation = trainer.predict(tokenized_nat)
 print(evaluation)
-
-
-
