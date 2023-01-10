@@ -32,9 +32,6 @@ label_map = {-1: 0, 0: 1, 1: 2}
 TEST_OUTPUT_DIR = "rds/hpc-work/output_bart_natural_test"
 TRAIN_OUTPUT_DIR = "rds/hpc-work/output_bart_natural_train"
 
-if os.path.exists(TRAIN_OUTPUT_DIR):
-    TRAIN_OUTPUT_DIR += str(date.today())
-
 if os.path.exists(TEST_OUTPUT_DIR):
     TEST_OUTPUT_DIR += str(date.today())
 
@@ -85,7 +82,14 @@ def compute_metrics(eval_pred):
 
 
 tokenizer = AutoTokenizer.from_pretrained("facebook/bart-large-mnli")
-model = AutoModelForSequenceClassification.from_pretrained("facebook/bart-large-mnli")
+if os.path.exists(TRAIN_OUTPUT_DIR):
+    pdb.set_trace()
+    file_list = os.listdir(TRAIN_OUTPUT_DIR) 
+    sorted_file_list = Tcl().call("lsort", "-dict", file_list)
+    latest_checkpoint = sorted_file_list[-1]
+    model = AutoModelForSequenceClassification.from_pretrained(TRAIN_OUTPUT_DIR+latest_checkpoint)
+else: 
+    model = AutoModelForSequenceClassification.from_pretrained("facebook/bart-large-mnli")
 
 if torch.cuda.is_available():
     device = torch.device("cuda")
