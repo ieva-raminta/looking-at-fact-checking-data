@@ -26,11 +26,12 @@ from sklearn.metrics import f1_score
 from collections import Counter
 from datasets import Dataset
 import random
+from tkinter import Tcl
 
 label_map = {-1: 0, 0: 1, 1: 2}
 
 TEST_OUTPUT_DIR = "rds/hpc-work/output_bart_natural_test"
-TRAIN_OUTPUT_DIR = "rds/hpc-work/output_bart_natural_train"
+TRAIN_OUTPUT_DIR = "rds/hpc-work/trained_bart_on_nat_claims" 
 
 if os.path.exists(TEST_OUTPUT_DIR):
     TEST_OUTPUT_DIR += str(date.today())
@@ -83,11 +84,10 @@ def compute_metrics(eval_pred):
 
 tokenizer = AutoTokenizer.from_pretrained("facebook/bart-large-mnli")
 if os.path.exists(TRAIN_OUTPUT_DIR):
-    pdb.set_trace()
     file_list = os.listdir(TRAIN_OUTPUT_DIR) 
     sorted_file_list = Tcl().call("lsort", "-dict", file_list)
     latest_checkpoint = sorted_file_list[-1]
-    model = AutoModelForSequenceClassification.from_pretrained(TRAIN_OUTPUT_DIR+latest_checkpoint)
+    model = AutoModelForSequenceClassification.from_pretrained(TRAIN_OUTPUT_DIR+"/"+latest_checkpoint)
 else: 
     model = AutoModelForSequenceClassification.from_pretrained("facebook/bart-large-mnli")
 
@@ -127,7 +127,7 @@ trainer = Trainer(
 )
 
 trainer.train()
-trainer.save_model("trained_bart_on_nat_claims")
+trainer.save_model(TRAIN_OUTPUT_DIR)
 
 test_args = TrainingArguments(
     output_dir = TEST_OUTPUT_DIR,
