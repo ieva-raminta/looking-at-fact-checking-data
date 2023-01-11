@@ -33,12 +33,7 @@ from datetime import date
 
 label_map = {-1: 0, 0: 1, 1: 2}
 
-TEST_OUTPUT_DIR = "rds/hpc-work/output_bart_natural_test"
-TRAIN_OUTPUT_DIR = "rds/hpc-work/output_bart_natural_train"
-
-if os.path.exists(TEST_OUTPUT_DIR):
-    TEST_OUTPUT_DIR += str(date.today())
-
+OUTPUT_DIR = "rds/hpc-work/output_bart_natural"
 
 def load_natural_datasets(filename):
     f = open(filename)
@@ -72,19 +67,20 @@ nat_train_dataset = load_natural_datasets("rds/hpc-work/nat_claims_train.jsonl")
 
 
 training_args = TrainingArguments(
-    output_dir=TRAIN_OUTPUT_DIR,
+    output_dir=OUTPUT_DIR,
     evaluation_strategy=IntervalStrategy.STEPS,
-    eval_steps=5000,
-    save_steps=5000,
+    eval_steps=500,
+    save_steps=500,
     save_total_limit=5,
     learning_rate=2e-5,
-    per_device_train_batch_size=4,
-    per_device_eval_batch_size=4,
+    per_device_train_batch_size=1,
+    per_device_eval_batch_size=1,
     num_train_epochs=20,
     weight_decay=0.01,
     push_to_hub=False,
     metric_for_best_model="f1",
     load_best_model_at_end=True,
+    gradient_accumulation_steps=4,
 )
 
 
@@ -100,12 +96,12 @@ def compute_metrics(eval_pred):
 
 tokenizer = AutoTokenizer.from_pretrained("facebook/bart-large-mnli")
 
-try:  # os.path.exists(TRAIN_OUTPUT_DIR) and len(os.listdir(TRAIN_OUTPUT_DIR)) != 0:
-    file_list = os.listdir(TRAIN_OUTPUT_DIR)
+try:  # os.path.exists(OUTPUT_DIR) and len(os.listdir(OUTPUT_DIR)) != 0:
+    file_list = os.listdir(OUTPUT_DIR)
     sorted_file_list = Tcl().call("lsort", "-dict", file_list)
     latest_checkpoint = sorted_file_list[-1]
     model = AutoModelForSequenceClassification.from_pretrained(
-        TRAIN_OUTPUT_DIR + "/" + latest_checkpoint
+        OUTPUT_DIR + "/" + latest_checkpoint
     )
 except:
     model = AutoModelForSequenceClassification.from_pretrained(
@@ -130,8 +126,8 @@ def tokenize_function(examples):
     return tokenizer(examples["premise"], examples["hypothesis"], padding="max_length")
 
 
-tokenized_nat_dev = nat_dev_dataset.map(tokenize_function, batched=True)
-tokenized_nat_train = nat_train_dataset.map(tokenize_function, batched=True)
+tokenized_nat_dev = nat_dev_dataset.map(tokenize_function)
+tokenized_nat_train = nat_train_dataset.map(tokenize_function)
 
 
 def compute_test_metrics(eval_pred):
@@ -155,15 +151,15 @@ trainer = Trainer(
 )
 
 trainer.train()
-trainer.save_model(TRAIN_OUTPUT_DIR)
+trainer.save_model(OUTPUT_DIR)
 
 test_args = TrainingArguments(
-    output_dir=TEST_OUTPUT_DIR,
+    output_dir=OUTPUT_DIR,
     do_train=False,
     do_predict=True,
     per_device_eval_batch_size=1,
     dataloader_drop_last=False,
-    eval_accumulation_steps=1,
+    eval_accumulation_steps=4,
 )
 
 
