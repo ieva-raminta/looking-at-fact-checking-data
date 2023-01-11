@@ -80,7 +80,7 @@ training_args = TrainingArguments(
     push_to_hub=False,
     metric_for_best_model="f1",
     load_best_model_at_end=True,
-    gradient_accumulation_steps=4,
+    gradient_accumulation_steps=1,
 )
 
 
@@ -129,6 +129,12 @@ def tokenize_function(examples):
 tokenized_nat_dev = nat_dev_dataset.map(tokenize_function)
 tokenized_nat_train = nat_train_dataset.map(tokenize_function)
 
+del nat_dev_dataset
+del nat_train_dataset
+
+tokenized_nat_dev = tokenized_nat_dev.remove_columns(["premise", "hypothesis"])
+tokenized_nat_train = tokenized_nat_train.remove_columns(["premise", "hypothesis"])
+
 
 def compute_test_metrics(eval_pred):
     with torch.no_grad():
@@ -159,7 +165,7 @@ test_args = TrainingArguments(
     do_predict=True,
     per_device_eval_batch_size=1,
     dataloader_drop_last=False,
-    eval_accumulation_steps=4,
+    eval_accumulation_steps=1,
 )
 
 

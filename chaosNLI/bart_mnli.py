@@ -92,13 +92,18 @@ def tokenize_function(examples):
 
 tokenized_nat = nat_dataset.map(tokenize_function, batched=True)
 
+del nat_dataset
+
+tokenized_nat = tokenized_nat.remove_columns(["premise", "hypothesis"])
+
+
 test_args = TrainingArguments(
     output_dir=OUTPUT_DIR,
     do_train=False,
     do_predict=True,
-    per_device_eval_batch_size=16,
+    per_device_eval_batch_size=1,
     dataloader_drop_last=False,
-    eval_accumulation_steps=1,
+    eval_accumulation_steps=4,
 )
 
 trainer = Trainer(
