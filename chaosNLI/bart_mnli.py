@@ -22,17 +22,16 @@ from datasets import (
     ClassLabel,
     Value,
 )
-from sklearn.metrics import f1_score
+from sklearn.metrics import f1_score, accuracy_score, recall_score, precision_score
 from collections import Counter
 from datasets import Dataset
 from datetime import date
 
-#mnli_labels_to_nat = {0: -1, 1: 0, 2: 1}
 nat_labels_to_mnli = {-1: 0, 0: 1, 1: 2}
 
 OUTPUT_DIR = "rds/hpc-work/output_bart_mnli"
 
-if os.path.exists(OUTPUT_DIR): 
+if os.path.exists(OUTPUT_DIR):
     OUTPUT_DIR += str(date.today())
 
 f = open("rds/hpc-work/nat_claims_dev.jsonl")
@@ -59,19 +58,23 @@ for item in nat_claims_dev_items:
             )
 nat_dataset = Dataset.from_list(nat_dataset)
 
-metric = evaluate.load("accuracy")
 
-
-def compute_metrics(eval_pred):
-    with torch.no_grad(): 
+def compute_test_metrics(eval_pred):
+    with torch.no_grad():
         logits, labels = eval_pred
     predictions = np.argmax(logits[0], axis=-1)
-    return metric.compute(predictions=predictions, references=labels)
-
+    accuracy = accuracy_score(y_true=labels, y_pred=predictions)
+    recall = recall_score(y_true=labels, y_pred=predictions)
+    precision = precision_score(y_true=labels, y_pred=predictions)
+    f1 = f1_score(y_true=labels, y_pred=predictions)
+    return {"accuracy": accuracy, "precision": precision, "recall": recall, "f1": f1}
 
 
 tokenizer = AutoTokenizer.from_pretrained("facebook/bart-large-mnli")
 model = AutoModelForSequenceClassification.from_pretrained("facebook/bart-large-mnli")
+
+for param in model.base_model.parameters():
+    param.requires_grad = False
 
 if torch.cuda.is_available():
     device = torch.device("cuda")
@@ -83,7 +86,6 @@ else:
     device = torch.device("cpu")
 
 
-
 def tokenize_function(examples):
     return tokenizer(examples["premise"], examples["hypothesis"], padding="max_length")
 
@@ -91,22 +93,19 @@ def tokenize_function(examples):
 tokenized_nat = nat_dataset.map(tokenize_function, batched=True)
 
 test_args = TrainingArguments(
-    output_dir = OUTPUT_DIR,
-    do_train = False,
-    do_predict = True,
-    per_device_eval_batch_size = 16,
-    dataloader_drop_last = False,
+    output_dir=OUTPUT_DIR,
+    do_train=False,
+    do_predict=True,
+    per_device_eval_batch_size=16,
+    dataloader_drop_last=False,
     eval_accumulation_steps=1,
-    )
+)
 
 trainer = Trainer(
     model=model,
     args=test_args,
-    compute_metrics=compute_metrics,
+    compute_metrics=compute_test_metrics,
 )
 
 evaluation = trainer.predict(tokenized_nat)
 print(evaluation)
-
-
-

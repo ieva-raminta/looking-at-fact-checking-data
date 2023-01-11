@@ -6,6 +6,8 @@ from transformers import (
     AlbertForSequenceClassification,
     AutoTokenizer,
     AutoModelForSequenceClassification,
+    EarlyStoppingCallback,
+    IntervalStrategy,
 )
 import torch
 import pdb
@@ -22,7 +24,7 @@ from datasets import (
     ClassLabel,
     Value,
 )
-from sklearn.metrics import f1_score
+from sklearn.metrics import f1_score, accuracy_score, recall_score, precision_score
 from collections import Counter
 from datasets import Dataset
 import random
@@ -69,33 +71,50 @@ nat_dev_dataset = load_natural_datasets("rds/hpc-work/nat_claims_dev.jsonl")
 nat_train_dataset = load_natural_datasets("rds/hpc-work/nat_claims_train.jsonl")
 
 
-metric = evaluate.load("accuracy")
 training_args = TrainingArguments(
     output_dir=TRAIN_OUTPUT_DIR,
-    evaluation_strategy="epoch",
+    evaluation_strategy=IntervalStrategy.STEPS,
+    eval_steps=5000,
+    save_steps=5000,
+    save_total_limit=5,
+    learning_rate=2e-5,
+    per_device_train_batch_size=16,
+    per_device_eval_batch_size=16,
     num_train_epochs=20,
-    per_device_train_batch_size=4,
+    weight_decay=0.01,
+    push_to_hub=False,
+    metric_for_best_model="f1",
+    load_best_model_at_end=True,
 )
 
 
 def compute_metrics(eval_pred):
     logits, labels = eval_pred
-    predictions = np.argmax(logits, axis=-1)
-    return metric.compute(predictions=predictions, references=labels)
+    predictions = np.argmax(logits[0], axis=-1)
+    accuracy = accuracy_score(y_true=labels, y_pred=predictions)
+    recall = recall_score(y_true=labels, y_pred=predictions)
+    precision = precision_score(y_true=labels, y_pred=predictions)
+    f1 = f1_score(y_true=labels, y_pred=predictions)
+    return {"accuracy": accuracy, "precision": precision, "recall": recall, "f1": f1}
 
 
 tokenizer = AutoTokenizer.from_pretrained("facebook/bart-large-mnli")
-if os.path.exists(TRAIN_OUTPUT_DIR):
+
+try:  # os.path.exists(TRAIN_OUTPUT_DIR) and len(os.listdir(TRAIN_OUTPUT_DIR)) != 0:
     file_list = os.listdir(TRAIN_OUTPUT_DIR)
     sorted_file_list = Tcl().call("lsort", "-dict", file_list)
     latest_checkpoint = sorted_file_list[-1]
     model = AutoModelForSequenceClassification.from_pretrained(
         TRAIN_OUTPUT_DIR + "/" + latest_checkpoint
     )
-else:
+except:
     model = AutoModelForSequenceClassification.from_pretrained(
         "facebook/bart-large-mnli"
     )
+
+for param in model.base_model.parameters():
+    param.requires_grad = False
+
 
 if torch.cuda.is_available():
     device = torch.device("cuda")
@@ -119,7 +138,11 @@ def compute_test_metrics(eval_pred):
     with torch.no_grad():
         logits, labels = eval_pred
     predictions = np.argmax(logits[0], axis=-1)
-    return metric.compute(predictions=predictions, references=labels)
+    accuracy = accuracy_score(y_true=labels, y_pred=predictions)
+    recall = recall_score(y_true=labels, y_pred=predictions)
+    precision = precision_score(y_true=labels, y_pred=predictions)
+    f1 = f1_score(y_true=labels, y_pred=predictions)
+    return {"accuracy": accuracy, "precision": precision, "recall": recall, "f1": f1}
 
 
 trainer = Trainer(
@@ -128,6 +151,7 @@ trainer = Trainer(
     train_dataset=tokenized_nat_train,
     eval_dataset=tokenized_nat_dev,
     compute_metrics=compute_metrics,
+    callbacks=[EarlyStoppingCallback(early_stopping_patience=3)],
 )
 
 trainer.train()
@@ -150,5 +174,6 @@ trainer = Trainer(
     compute_metrics=compute_test_metrics,
 )
 
-evaluation = trainer.predict(tokenized_nat)
+evaluation = trainer.predict(tokenized_nat_dev)
+
 print(evaluation)
