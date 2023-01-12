@@ -33,7 +33,8 @@ from datetime import date
 
 label_map = {-1: 0, 0: 1, 1: 2}
 
-OUTPUT_DIR = "rds/hpc-work/output_bart_natural"
+#OUTPUT_DIR = "rds/hpc-work/output_bart_natural"
+OUTPUT_DIR = "rds/hpc-work/output_albert_natural"
 
 def load_natural_datasets(filename):
     f = open(filename)
@@ -94,18 +95,18 @@ def compute_metrics(eval_pred):
     return {"accuracy": accuracy, "precision": precision, "recall": recall, "f1": f1}
 
 
-tokenizer = AutoTokenizer.from_pretrained("facebook/bart-large-mnli")
+tokenizer = AlbertTokenizer.from_pretrained("prajjwal1/albert-base-v2-mnli") #facebook/bart-base-mnli")
 
 try:  # os.path.exists(OUTPUT_DIR) and len(os.listdir(OUTPUT_DIR)) != 0:
     file_list = os.listdir(OUTPUT_DIR)
     sorted_file_list = Tcl().call("lsort", "-dict", file_list)
     latest_checkpoint = sorted_file_list[-1]
-    model = AutoModelForSequenceClassification.from_pretrained(
+    model = AlbertForSequenceClassification.from_pretrained(
         OUTPUT_DIR + "/" + latest_checkpoint
     )
 except:
-    model = AutoModelForSequenceClassification.from_pretrained(
-        "facebook/bart-large-mnli"
+    model = AlbertForSequenceClassification.from_pretrained(
+       "prajjwal1/albert-base-v2-mnli" #"facebook/bart-base-mnli"
     )
 
 for param in model.base_model.parameters():
