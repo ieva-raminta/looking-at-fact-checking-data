@@ -30,7 +30,6 @@ from datetime import date
 nat_labels_to_mnli = {-1: 0, 0: 1, 1: 2}
 nat_labels_to_glue = {-1: 1, 0: 2, 1: 0}
 
-OUTPUT_DIR = "rds/hpc-work/output_bart_mnli"
 OUTPUT_DIR = "rds/hpc-work/output_albert_mnli"
 
 if os.path.exists(OUTPUT_DIR):
