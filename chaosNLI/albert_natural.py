@@ -65,16 +65,14 @@ def load_natural_datasets(filename):
     nat_Dataset = Dataset.from_list(nat_dataset)
     return nat_Dataset
 
-
 nat_dev_dataset = load_natural_datasets("rds/hpc-work/nat_claims_dev.jsonl")
 nat_train_dataset = load_natural_datasets("rds/hpc-work/nat_claims_train.jsonl")
-
 
 training_args = TrainingArguments(
     output_dir=OUTPUT_DIR,
     evaluation_strategy=IntervalStrategy.STEPS,
-    eval_steps=500,
-    save_steps=500,
+    eval_steps=len(nat_train_dataset),
+    save_steps=len(nat_train_dataset),
     save_total_limit=5,
     learning_rate=2e-5,
     per_device_train_batch_size=4,
