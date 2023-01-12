@@ -30,7 +30,6 @@ from datetime import date
 nat_labels_to_mnli = {-1: 0, 0: 1, 1: 2}
 
 OUTPUT_DIR = "rds/hpc-work/output_bart_mnli"
-OUTPUT_DIR = "rds/hpc-work/output_albert_mnli"
 
 if os.path.exists(OUTPUT_DIR):
     OUTPUT_DIR += str(date.today())
@@ -71,8 +70,8 @@ def compute_test_metrics(eval_pred):
     return {"accuracy": accuracy, "precision": precision, "recall": recall, "f1": f1}
 
 
-tokenizer = AlbertTokenizer.from_pretrained("prajjwal1/albert-base-v2-mnli") #"facebook/bart-large-mnli")
-model = AlbertForSequenceClassification.from_pretrained("prajjwal1/albert-base-v2-mnli") #"facebook/bart-large-mnli")
+tokenizer = AutoTokenizer.from_pretrained("facebook/bart-large-mnli")
+model = AutoModelForSequenceClassification.from_pretrained("facebook/bart-large-mnli")
 
 for param in model.base_model.parameters():
     param.requires_grad = False
