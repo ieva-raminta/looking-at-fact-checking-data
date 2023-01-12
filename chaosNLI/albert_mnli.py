@@ -65,7 +65,6 @@ def compute_test_metrics(eval_pred):
     with torch.no_grad():
         logits, labels = eval_pred
     predictions = np.argmax(logits, axis=-1)
-    pdb.set_trace()
     accuracy = accuracy_score(y_true=labels, y_pred=predictions)
     recall = recall_score(y_true=labels, y_pred=predictions, average="weighted")
     precision = precision_score(y_true=labels, y_pred=predictions, average="weighted")
