@@ -77,14 +77,14 @@ training_args = TrainingArguments(
     save_steps=500,
     save_total_limit=5,
     learning_rate=2e-5,
-    per_device_train_batch_size=1,
+    per_device_train_batch_size=4,
     per_device_eval_batch_size=1,
     num_train_epochs=20,
     weight_decay=0.01,
     push_to_hub=False,
     metric_for_best_model="f1",
     load_best_model_at_end=True,
-    gradient_accumulation_steps=1,
+    gradient_accumulation_steps=4,
 )
 
 
@@ -169,9 +169,9 @@ test_args = TrainingArguments(
     output_dir=OUTPUT_DIR,
     do_train=False,
     do_predict=True,
-    per_device_eval_batch_size=1,
+    per_device_eval_batch_size=4,
     dataloader_drop_last=False,
-    eval_accumulation_steps=1,
+    eval_accumulation_steps=4,
 )
 
 
